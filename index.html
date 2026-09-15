@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>体育课出勤统计 · 教师端</title>
+<style>
+:root{
+  --bg:#f4f6f8; --card:#ffffff; --ink:#1c2733; --muted:#6b7a89;
+  --line:#e3e8ee; --brand:#0f766e; --brand-ink:#0b5d57;
+  --ok:#16a34a; --practice:#d97706; --leave:#2563eb; --absent:#dc2626; --none:#9aa7b3;
+  --ok-bg:#ecfdf3; --practice-bg:#fff7ed; --leave-bg:#eff6ff; --absent-bg:#fef2f2; --none-bg:#f3f4f6;
+  --pink:#db2777; --pink-bg:#fdf2f8;
+  --radius:14px; --shadow:0 1px 2px rgba(16,30,50,.05),0 4px 14px rgba(16,30,50,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;font-size:14px}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:14px;color:var(--ink)}
+::selection{background:#99f6e4}
+.app{display:flex;min-height:100vh}
+.side{width:220px;flex:0 0 220px;background:#0f172a;color:#cbd5e1;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:10px;padding:20px 18px;color:#fff;border-bottom:1px solid rgba(255,255,255,.08)}
+.brand .logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#14b8a6,#0d9488);display:flex;align-items:center;justify-content:center;color:#fff}
+.brand b{font-size:15px;letter-spacing:.5px}
+.brand small{display:block;font-size:11px;color:#7d8ba1;font-weight:400;letter-spacing:1px}
+.nav{padding:12px 10px;flex:1}
+.nav-item{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:9px;color:#a8b6c8;font-size:14px;margin-bottom:2px;transition:.15s}
+.nav-item svg{flex:0 0 auto}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav-item.active{background:rgba(20,184,166,.16);color:#5eead4}
+.side-foot{padding:14px 18px;font-size:11px;color:#64748b;border-top:1px solid rgba(255,255,255,.06)}
+.main{flex:1;min-width:0}
+.top{height:60px;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 26px;position:sticky;top:0;z-index:20}
+.top h1{font-size:18px;font-weight:700}
+.top .sub{font-size:12px;color:var(--muted);margin-top:1px}
+.top .hamb{display:none;background:none;border:none;color:var(--ink);padding:6px}
+.content{padding:24px 26px 60px;max-width:1180px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:18px}
+.card-h{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.card-h h2{font-size:15px;font-weight:700}
+.card-b{padding:18px 20px}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;color:var(--ink);padding:8px 14px;border-radius:9px;font-size:13px;font-weight:600;transition:.15s;white-space:nowrap}
+.btn:hover{border-color:#c7d0da;background:#f8fafb}
+.btn-primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn-primary:hover{background:var(--brand-ink);border-color:var(--brand-ink)}
+.btn-sm{padding:5px 10px;font-size:12px;border-radius:7px}
+.icon-btn{background:none;border:none;color:var(--muted);padding:5px;border-radius:6px;display:inline-flex}
+.icon-btn:hover{background:#eef2f5;color:var(--ink)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:12px;color:var(--muted);font-weight:600}
+.field input,.field select{height:38px;padding:0 12px;border:1px solid var(--line);border-radius:8px;background:#fff;outline:none}
+.field input:focus,.field select:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(15,118,110,.12)}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.row .field{flex:1;min-width:150px}
+.hint{font-size:12px;color:var(--muted)}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:11px 12px;text-align:left;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:600;font-size:12px;background:#fafbfc;white-space:nowrap}
+tbody tr:hover{background:#f8fafb}
+td.num{font-variant-numeric:tabular-nums}
+.empty{padding:40px;text-align:center;color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill.present{background:var(--ok-bg);color:var(--ok)}
+.pill.practice{background:var(--practice-bg);color:var(--practice)}
+.pill.leave{background:var(--leave-bg);color:var(--leave)}
+.pill.absent{background:var(--absent-bg);color:var(--absent)}
+.pill.none{background:var(--none-bg);color:var(--none)}
+.pill.pink{background:var(--pink-bg);color:var(--pink)}
+.att-row{display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid var(--line)}
+.att-row:last-child{border-bottom:none}
+.att-info{flex:1;min-width:0}
+.att-name{font-weight:600;font-size:14px}
+.att-no{font-size:11.5px;color:var(--muted)}
+.period-tip{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--pink);background:var(--pink-bg);padding:3px 9px;border-radius:7px;margin-top:4px;font-weight:600}
+.att-btns{display:flex;gap:6px;flex-wrap:wrap}
+.att-btns button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 10px;font-size:12.5px;font-weight:600;color:var(--muted);transition:.12s;white-space:nowrap}
+.att-btns button.on.present{background:var(--ok);border-color:var(--ok);color:#fff}
+.att-btns button.on.practice{background:var(--practice);border-color:var(--practice);color:#fff}
+.att-btns button.on.leave{background:var(--leave);border-color:var(--leave);color:#fff}
+.att-btns button.on.absent{background:var(--absent);border-color:var(--absent);color:#fff}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:18px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
+.stat .v{font-size:26px;font-weight:800;line-height:1.1}
+.stat .l{font-size:12px;color:var(--muted);margin-top:3px}
+.stat.ok .v{color:var(--ok)} .stat.practice .v{color:var(--practice)} .stat.leave .v{color:var(--leave)} .stat.absent .v{color:var(--absent)} .stat.pink .v{color:var(--pink)}
+.class-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.class-card{border:1px solid var(--line);border-radius:12px;background:#fff;padding:16px;box-shadow:var(--shadow);transition:.15s;cursor:pointer;position:relative}
+.class-card:hover{border-color:#a7d8d1;transform:translateY(-1px)}
+.class-card h3{font-size:15px;margin-bottom:2px}
+.class-card .meta{font-size:12px;color:var(--muted);margin-bottom:12px}
+.class-card .cc-act{position:absolute;top:12px;right:10px;display:flex;gap:2px;opacity:0;transition:.15s}
+.class-card:hover .cc-act{opacity:1}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#1c2733;color:#fff;padding:10px 18px;border-radius:9px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:100}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.modal-mask{position:fixed;inset:0;background:rgba(15,23,42,.45);display:none;align-items:flex-start;justify-content:center;padding:50px 18px;z-index:50;overflow:auto}
+.modal-mask.show{display:flex}
+.modal{background:#fff;border-radius:14px;width:100%;max-width:520px;box-shadow:0 20px 50px rgba(0,0,0,.2)}
+.modal-h{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.modal-h h3{font-size:15px;font-weight:700}
+.modal-b{padding:20px}
+.modal-f{padding:14px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px}
+.filter-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.chip{border:1px solid var(--line);background:#fff;padding:6px 12px;border-radius:999px;font-size:12.5px;color:var(--muted);font-weight:600;cursor:pointer}
+.chip.active{background:var(--brand);border-color:var(--brand);color:#fff}
+.overlay{position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:55;display:none}
+.overlay.show{display:block}
+@media(max-width:860px){
+  .side{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%);transition:.25s;z-index:60;width:240px;height:100vh}
+  .side.open{transform:translateX(0)}
+  .top .hamb{display:inline-flex}
+  .content{padding:18px 14px 60px}
+  .stats{grid-template-columns:repeat(auto-fit,minmax(110px,1fr))}
+}
+@media(max-width:560px){
+  .card-h{flex-direction:column;align-items:flex-start}
+  .att-btns button{padding:6px 8px;font-size:12px}
+  .class-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side" id="side">
+    <div class="brand">
+      <div class="logo">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5" /></svg>
+      </div>
+      <div><b>出勤统计</b><small>体育课教师端</small></div>
+    </div>
+    <nav class="nav">
+      <a class="nav-item" data-view="overview" href="#/overview">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1" /><rect x="14" y="3" width="7" height="5" rx="1" /><rect x="14" y="12" width="7" height="9" rx="1" /><rect x="3" y="16" width="7" height="5" rx="1" /></svg>
+        概览
+      </a>
+      <a class="nav-item" data-view="classes" href="#/classes">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h13v14H3z" /><path d="M16 9h5v10h-5z" /><path d="M8 9h3M8 12h3M8 15h3" /></svg>
+        班级与名单
+      </a>
+      <a class="nav-item" data-view="lessons" href="#/lessons">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2" /><path d="M8 2v4M16 2v4M3 9h18" /><path d="M9 14l2 2 4-4" /></svg>
+        课时考勤
+      </a>
+      <a class="nav-item" data-view="stats" href="#/stats">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></svg>
+        统计导出
+      </a>
+      <a class="nav-item" data-view="periods" href="#/periods">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2" /><path d="M8 2v4M16 2v4M3 9h18" /><circle cx="12" cy="15" r="3.5" /></svg>
+        生理期统计
+      </a>
+    </nav>
+    <div class="side-foot">数据保存在本机浏览器<br>可随时导出 Excel</div>
+  </aside>
+  <div class="overlay" id="overlay"></div>
+  <div class="main">
+    <div class="top">
+      <button class="hamb" id="hamb">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+      </button>
+      <div><h1 id="pageTitle">概览</h1><div class="sub" id="pageSub"></div></div>
+      <div></div>
+    </div>
+    <div class="content" id="view"></div>
+  </div>
+</div>
+<div id="toast"></div>
+<div class="modal-mask" id="modalMask"><div class="modal" id="modal"></div></div>
+
+<script>
+const DB_KEY = 'pe_attendance_v2';
+let db = load();
+function load(){
+  let d = null;
+  try{ const raw = localStorage.getItem(DB_KEY); if(raw) d = JSON.parse(raw); }catch(e){}
+  if(!d || typeof d !== 'object' || Array.isArray(d)) d = {};
+  return {
+    classes: Array.isArray(d.classes)?d.classes:[],
+    students: Array.isArray(d.students)?d.students:[],
+    lessons: Array.isArray(d.lessons)?d.lessons:[],
+    att: Array.isArray(d.att)?d.att:[],
+    periods: Array.isArray(d.periods)?d.periods:[]
+  };
+}
+function save(){ localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+
+let lessonDraftDate = null;
+let isFirstEnterLessons = true;
+
+const STATUS = {
+  present:{label:'已到', cls:'present', excelStyleId:'s_green'},
+  practice:{label:'见习', cls:'practice', excelStyleId:'s_orange'},
+  leave_sick:{label:'病假', cls:'leave', excelStyleId:'s_blue'},
+  leave_affair:{label:'事假', cls:'leave', excelStyleId:'s_blue'},
+  absent:{label:'缺席', cls:'absent', excelStyleId:'s_red'},
+};
+const STATUS_UI_ORDER = ['present','_leave_picker','practice','absent'];
+
+function formatDateDot(str){
+  if(!str) return '';
+  return str.replace(/-/g,'.');
+}
+function noNum(v){ const m=String(v==null?'':v).match(/^\d+$/); return m?parseInt(m[0],10):null; }
+function sortByNo(a,b){
+  const an=noNum(a.no), bn=noNum(b.no);
+  if(an!=null&&bn!=null) return an-bn;
+  if(an!=null) return -1; if(bn!=null) return 1;
+  return String(a.no).localeCompare(String(b.no),'zh',{numeric:true});
+}
+function studentsOf(classId){ return db.students.filter(s=>s.classId===classId).sort(sortByNo); }
+function className(id){ const c=db.classes.find(c=>c.id===id); return c?c.name:'(已删除班级)'; }
+function lessonOf(id){ return db.lessons.find(l=>l.id===id); }
+
+// ===== 生理期工具 =====
+function parseLocal(dateStr){ const p=String(dateStr||'').split('-').map(Number); return new Date(p[0],(p[1]||1)-1,p[2]||1); }
+function dateDiffDays(d1,d2){ return Math.round((parseLocal(d1)-parseLocal(d2))/86400000); }
+function daysAdd(dateStr,days){ const d=parseLocal(dateStr); d.setDate(d.getDate()+days); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function periodInfo(studentId){ return (db.periods||[]).find(x=>x.studentId===studentId) || null; }
+function isOnPeriod(studentId,date){
+  const p=periodInfo(studentId); if(!p||!p.startDate) return false;
+  const duration=p.duration||5, cycle=p.cycleDays||28;
+  if(!(cycle>0)) return false;
+  const m=((dateDiffDays(date,p.startDate)%cycle)+cycle)%cycle;
+  return m>=0 && m<duration;
+}
+function nextPeriodStart(studentId){
+  const p=periodInfo(studentId); if(!p||!p.startDate) return null;
+  const today=new Date().toISOString().slice(0,10);
+  const cycle=p.cycleDays||28;
+  const m=((dateDiffDays(today,p.startDate)%cycle)+cycle)%cycle;
+  return daysAdd(today, cycle-m);
+}
+
+let currentView = 'overview';
+const TITLES = {overview:['概览','各班级近期出勤一览'], classes:['班级与名单','管理班级和学生'], lessons:['课时考勤','创建课时并标记出勤'], stats:['统计导出','汇总数据并导出 Excel'], periods:['生理期统计','记录学生生理期并辅助见习统计']};
+
+function router(){
+  const prevView = currentView;
+  const h = (location.hash.replace('#/','')||'').split('?')[0] || 'overview';
+  const view = ['overview','classes','lessons','stats','periods'].includes(h)?h:'overview';
+  currentView = view;
+  if(view === 'lessons' && prevView !== 'lessons'){
+    isFirstEnterLessons = true;
+  }else if(view === 'lessons' && prevView === 'lessons'){
+    isFirstEnterLessons = false;
+  }
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.view===view));
+  const t = TITLES[view];
+  document.getElementById('pageTitle').textContent = t[0];
+  document.getElementById('pageSub').textContent = t[1];
+  closeSide();
+  render();
+}
+function render(){
+  const el = document.getElementById('view');
+  try{
+    if(currentView==='overview') el.innerHTML = vOverview();
+    else if(currentView==='classes') el.innerHTML = vClasses();
+    else if(currentView==='lessons') el.innerHTML = vLessons();
+    else if(currentView==='stats') el.innerHTML = vStats();
+    else if(currentView==='periods') el.innerHTML = vPeriods();
+  }catch(err){
+    el.innerHTML = `<div class="card"><div class="empty"><div style="font-weight:600;color:#c0392b;font-size:15px">页面渲染出错</div><div style="margin-top:6px;color:#555">${esc(err.message)}</div><div style="margin-top:10px;font-size:12px;color:#888">可尝试按 F5 刷新；若持续出现请截图反馈。</div></div></div>`;
+  }
+  bind();
+}
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function emptyState(title, sub){
+  return `<div class="card"><div class="empty">
+    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18M9 21V9" /></svg>
+    <div style="font-weight:600;color:var(--ink);font-size:15px">${esc(title)}</div>
+    <div style="margin-top:4px">${esc(sub)}</div></div></div>`;
+}
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2200);
+}
+function lessonSum(lessonId){
+  const s={present:0,practice:0,leave_sick:0,leave_affair:0,absent:0};
+  db.att.forEach(a=>{ if(a.lessonId===lessonId && STATUS[a.status]) s[a.status]++; });
+  return s;
+}
+
+function vOverview(){
+  if(!db.classes.length) return emptyState('还没有班级', '先从左侧「班级与名单」添加班级，或导入学生名单。');
+  const recent = db.lessons.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+  let cards = db.classes.map(c=>{
+    const clsStudents = studentsOf(c.id);
+    const sum = {present:0,practice:0,leave_sick:0,leave_affair:0,absent:0};
+    db.att.forEach(a=>{ const s=db.students.find(x=>x.id===a.studentId); if(s&&s.classId===c.id && STATUS[a.status]) sum[a.status]++; });
+    const total = clsStudents.length;
+    const lessons = db.lessons.filter(l=>l.classId===c.id).length;
+    return `<div class="class-card" onclick="location.hash='#/classes?c=${c.id}'">
+      <h3>${esc(c.name)}</h3>
+      <div class="meta">${total} 名学生 · ${lessons} 节课时</div>
+      <div class="stats" style="grid-template-columns:repeat(4,1fr);margin:0">
+        <div class="stat ok" style="padding:8px"><div class="v" style="font-size:18px">${sum.present}</div><div class="l" style="font-size:11px">已到</div></div>
+        <div class="stat practice" style="padding:8px"><div class="v" style="font-size:18px">${sum.practice}</div><div class="l" style="font-size:11px">见习</div></div>
+        <div class="stat leave" style="padding:8px"><div class="v" style="font-size:18px">${sum.leave_sick+sum.leave_affair}</div><div class="l" style="font-size:11px">请假</div></div>
+        <div class="stat absent" style="padding:8px"><div class="v" style="font-size:18px">${sum.absent}</div><div class="l" style="font-size:11px">缺席</div></div>
+      </div>
+    </div>`;
+  }).join('');
+  let recentHtml;
+  if(recent.length){
+    recentHtml = `<div class="card"><div class="card-h"><h2>最近课时</h2><button class="btn btn-sm" onclick="location.hash='#/lessons'">查看全部</button></div>
+    <div class="table-wrap"><table><thead><tr><th>班级</th><th>日期</th><th>已到</th><th>见习</th><th>请假</th><th>缺席</th><th>状态</th></tr></thead><tbody>`;
+    recent.forEach(l=>{
+      const c=className(l.classId); const s=studentsOf(l.classId).length;
+      const sum=lessonSum(l.id);
+      const leaveTotal = sum.leave_sick + sum.leave_affair;
+      recentHtml+=`<tr onclick="location.hash='#/lessons?open=${l.id}'" style="cursor:pointer">
+        <td>${esc(c)}</td><td>${esc(l.date)}${l.note?' <span class="hint">· '+esc(l.note)+'</span>':''}</td>
+        <td class="num">${sum.present}</td><td class="num">${sum.practice}</td><td class="num">${leaveTotal}</td><td class="num">${sum.absent}</td>
+        <td>${sum.present+sum.practice+leaveTotal+sum.absent===s?'<span class="pill present">已点齐</span>':'<span class="pill none">未完成</span>'}</td></tr>`;
+    });
+    recentHtml+='</tbody></table></div></div>';
+  } else {
+    recentHtml = `<div class="card"><div class="card-h"><h2>最近课时</h2></div><div class="empty">还没有课时记录，去「课时考勤」新建一节课开始标记。</div></div>`;
+  }
+  return `<div class="stats">
+      <div class="stat total"><div class="v">${db.classes.length}</div><div class="l">班级</div></div>
+      <div class="stat total"><div class="v">${db.students.length}</div><div class="l">学生</div></div>
+      <div class="stat total"><div class="v">${db.lessons.length}</div><div class="l">课时</div></div>
+      <div class="stat ok"><div class="v">${db.att.filter(a=>a.status==='present').length}</div><div class="l">已到人次</div></div>
+    </div>
+    <div class="class-grid">${cards}</div>
+    <div style="height:18px"></div>
+    ${recentHtml}`;
+}
+
+function vClasses(){
+  const qp = new URLSearchParams(location.hash.split('?')[1]||'');
+  const focus = qp.get('c');
+  if(!db.classes.length){
+    return emptyState('还没有班级', '先添加班级，再导入或添加学生名单。') + `<div style="text-align:center"><button class="btn btn-primary" onclick="openClassModal()">+ 添加第一个班级</button></div>`;
+  }
+  let html = `<div class="class-grid">`;
+  db.classes.forEach(c=>{
+    const n = studentsOf(c.id).length;
+    html += `<div class="class-card" onclick="location.hash='#/classes?c=${c.id}'">
+      <h3>${esc(c.name)}</h3><div class="meta">${n} 名学生</div>
+      <div class="cc-act" onclick="event.stopPropagation()">
+        <button class="icon-btn" title="重命名" onclick="openClassModal('${c.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z" /></svg></button>
+        <button class="icon-btn" title="删除班级" onclick="delClass('${c.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14" /></svg></button>
+      </div></div>`;
+  });
+  html += `</div><div style="text-align:right;margin:4px 0 18px"><button class="btn" onclick="openClassModal()">+ 添加班级</button></div>`;
+  let cid = focus && db.classes.some(c=>c.id===focus) ? focus : db.classes[0].id;
+  const cls = db.classes.find(c=>c.id===cid);
+  const stus = studentsOf(cid);
+  html += `<div class="card"><div class="card-h">
+      <h2>${esc(cls.name)} · 学生名单（${stus.length} 人）</h2>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-sm" onclick="openImport('${cid}')">导入名单</button>
+        <button class="btn btn-sm" onclick="openStudentModal('${cid}')">+ 添加学生</button>
+      </div></div><div class="card-b">`;
+  if(!stus.length){
+    html += `<div class="empty">该班级还没有学生。点击「导入名单」批量添加，或「添加学生」逐个录入。</div>`;
+  } else {
+    html += `<div class="table-wrap"><table><thead><tr><th>序号</th><th>姓名</th><th>性别</th><th style="width:90px"></th></tr></thead><tbody>`;
+    stus.forEach(s=>{
+      html += `<tr><td class="num">${esc(s.no)}</td><td>${esc(s.name)}</td><td>${esc(s.gender||'—')}</td>
+      <td><div style="display:flex;gap:2px">
+        <button class="icon-btn" title="编辑" onclick="openStudentModal('${cid}','${s.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z" /></svg></button>
+        <button class="icon-btn" title="删除" onclick="delStudent('${s.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14" /></svg></button>
+      </div></td></tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+  html += `</div></div>`;
+  return html;
+}
+
+function vLessons(){
+  const qp = new URLSearchParams(location.hash.split('?')[1]||'');
+  const openId = qp.get('open');
+  if(openId && lessonOf(openId)) return vAttendance(openId);
+  if(!db.classes.length){
+    return emptyState('还没有班级', '请先到「班级与名单」添加班级和学生。');
+  }
+  const todayIso = new Date().toISOString().slice(0,10);
+  if(isFirstEnterLessons || !lessonDraftDate){
+    lessonDraftDate = todayIso;
+  }
+  const list = db.lessons.slice().sort((a,b)=>b.date.localeCompare(a.date));
+  let html = `<div class="card"><div class="card-h"><h2>新建课时</h2></div><div class="card-b">
+    <div class="row">
+      <div class="field"><label>班级</label><select id="newLessonClass">${db.classes.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select></div>
+      <div class="field"><label>上课日期</label><input type="date" id="newLessonDate" value="${esc(lessonDraftDate)}"></div>
+      <div class="field"><label>备注（可选）</label><input type="text" id="newLessonNote" placeholder="如：篮球课 / 体质测试"></div>
+      <button class="btn btn-primary" onclick="createLesson()">创建并标记</button>
+    </div></div></div>`;
+  if(!list.length){
+    html += `<div class="card"><div class="card-h"><h2>课时记录</h2></div><div class="empty">还没有课时。上方选择班级和日期，创建第一节课。</div></div>`;
+  } else {
+    html += `<div class="card"><div class="card-h"><h2>课时记录（${list.length} 节）</h2></div><div class="table-wrap"><table><thead><tr><th>班级</th><th>日期</th><th>备注</th><th>已到</th><th>见习</th><th>请假</th><th>缺席</th><th></th></tr></thead><tbody>`;
+    list.forEach(l=>{
+      const sum=lessonSum(l.id); const total=studentsOf(l.classId).length;
+      const leaveTotal = sum.leave_sick + sum.leave_affair;
+      html+=`<tr>
+        <td>${esc(className(l.classId))}</td><td>${esc(l.date)}</td>
+        <td class="hint">${esc(l.note||'—')}</td>
+        <td class="num">${sum.present}</td><td class="num">${sum.practice}</td><td class="num">${leaveTotal}</td><td class="num">${sum.absent}</td>
+        <td><div style="display:flex;gap:6px">
+          <button class="btn btn-sm" onclick="location.hash='#/lessons?open=${l.id}'">标记</button>
+          <button class="icon-btn" title="删除课时" onclick="delLesson('${l.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14" /></svg></button>
+        </div></td></tr>`;
+    });
+    html+='</tbody></table></div></div>';
+  }
+  return html;
+}
+
+function vAttendance(lessonId){
+  const l = lessonOf(lessonId);
+  if(!l) return '';
+  const stus = studentsOf(l.classId);
+  const sum = lessonSum(lessonId);
+  const leaveTotal = sum.leave_sick + sum.leave_affair;
+  const get = sid => { const a=db.att.find(x=>x.lessonId===lessonId&&x.studentId===sid); return a?a.status:null; };
+  let html = `<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+      <div><a href="#/lessons" class="hint" style="display:inline-flex;align-items:center;gap:4px">← 返回课时列表</a>
+      <h2 style="font-size:18px;margin-top:4px">${esc(className(l.classId))} · ${esc(l.date)}${l.note?' · '+esc(l.note):''}</h2></div>
+      <button class="btn btn-primary" onclick="location.hash='#/lessons'">保存并返回</button>
+    </div>`;
+  html += `<div class="stats">
+    <div class="stat total"><div class="v">${stus.length}</div><div class="l">总人数</div></div>
+    <div class="stat ok"><div class="v">${sum.present}</div><div class="l">已到</div></div>
+    <div class="stat practice"><div class="v">${sum.practice}</div><div class="l">见习</div></div>
+    <div class="stat leave"><div class="v">${leaveTotal}</div><div class="l">请假(病+事)</div></div>
+    <div class="stat absent"><div class="v">${sum.absent}</div><div class="l">缺席</div></div>
+  </div>`;
+  if(!stus.length){
+    html += `<div class="card"><div class="empty">该班级还没有学生，无法标记。请先到「班级与名单」添加学生。</div></div>`;
+    return html;
+  }
+  html += `<div class="card"><div class="card-b">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
+      <span class="hint">批量标记：</span>
+      <button class="chip" onclick="bulkSet('${lessonId}','present')">全为已到</button>
+      <button class="chip" onclick="bulkSet('${lessonId}','practice')">全为见习</button>
+      <button class="chip" onclick="openBulkLeave('${lessonId}')">批量设置请假</button>
+      <button class="chip" onclick="bulkSet('${lessonId}','absent')">全为缺席</button>
+      <button class="chip" onclick="bulkSet('${lessonId}',null)" style="margin-left:auto">清空全部</button>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
+      <span class="hint">生理期辅助：</span>
+      <button class="chip" style="color:var(--pink);border-color:#f5c1d6" onclick="markPeriodToPractice('${lessonId}')">生理期学生一键标见习</button>
+      <span class="hint">（根据生理期统计自动识别当天处于生理期的女生，批量标记为见习）</span>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:4px">逐一点击学生右侧状态即可标记；【请假】点击会弹窗选择病假/事假；处于生理期的女生会显示粉色提示。</div>`;
+  stus.forEach(s=>{
+    const cur = get(s.id);
+    const onPeriod = s.gender==='女' && isOnPeriod(s.id, l.date);
+    let btnsHtml = '';
+    STATUS_UI_ORDER.forEach(k=>{
+      if(k === '_leave_picker'){
+        btnsHtml += `<button class="${(cur==='leave_sick'||cur==='leave_affair')?'on leave':''}" onclick="openLeavePicker('${lessonId}','${s.id}')">请假</button>`;
+      }else{
+        const st=STATUS[k];
+        btnsHtml += `<button class="${cur===k?'on '+st.cls:''}" data-status="${k}" onclick="setAtt('${lessonId}','${s.id}','${k}')">${st.label}</button>`;
+      }
+    });
+    html += `<div class="att-row">
+      <div class="att-info"><div class="att-name">${esc(s.name)} <span style="font-weight:400;color:var(--muted);font-size:12px">${esc(s.gender||'')}</span></div><div class="att-no">序号 ${esc(s.no)}</div>
+      ${onPeriod ? `<div class="period-tip">生理期（预测） · 可点右侧「见习」</div>` : ''}
+      ${cur ? `<div style="font-size:12px;color:var(--muted)">当前：${STATUS[cur].label}</div>` : ''}
+      </div>
+      <div class="att-btns">${btnsHtml}</div>
+    </div>`;
+  });
+  html += `</div></div>`;
+  return html;
+}
+
+function openLeavePicker(lessonId, studentId){
+  openModal(`<h3>选择请假类型</h3>`,
+    `<div class="hint">请选择：病假 或 事假</div>`,
+    `<button class="btn" onclick="closeModal()">取消</button>
+     <button class="btn btn-primary" onclick="doSetLeave('${lessonId}','${studentId}','leave_sick')">病假</button>
+     <button class="btn btn-primary" onclick="doSetLeave('${lessonId}','${studentId}','leave_affair')">事假</button>`);
+}
+function doSetLeave(lessonId,studentId,status){
+  closeModal();
+  const idx = db.att.findIndex(a=>a.lessonId===lessonId&&a.studentId===studentId);
+  if(idx>-1){
+    if(db.att[idx].status===status){ db.att.splice(idx,1); }
+    else db.att[idx].status=status;
+  } else {
+    db.att.push({lessonId,studentId,status});
+  }
+  save(); render();
+}
+function openBulkLeave(lessonId){
+  openModal(`<h3>批量设置请假类型</h3>`,
+    `<div class="hint">选择将全部学生标记为何种请假</div>`,
+    `<button class="btn" onclick="closeModal()">取消</button>
+     <button class="btn btn-primary" onclick="bulkSetLeave('${lessonId}','leave_sick')">全部病假</button>
+     <button class="btn btn-primary" onclick="bulkSetLeave('${lessonId}','leave_affair')">全部事假</button>`);
+}
+function bulkSetLeave(lessonId,status){
+  closeModal();
+  const l = lessonOf(lessonId);
+  const stus = studentsOf(l.classId);
+  stus.forEach(s=>{
+    let r = db.att.find(x=>x.lessonId===lessonId&&x.studentId===s.id);
+    if(!r) db.att.push({lessonId,studentId:s.id,status});
+    else r.status = status;
+  });
+  save(); toast(`已全部标记为「${STATUS[status].label}」`); render();
+}
+function markPeriodToPractice(lessonId){
+  const l = lessonOf(lessonId);
+  let count=0;
+  studentsOf(l.classId).forEach(s=>{
+    if(s.gender!=='女' || !isOnPeriod(s.id, l.date)) return;
+    const idx = db.att.findIndex(a=>a.lessonId===lessonId&&a.studentId===s.id);
+    if(idx>-1) db.att[idx].status='practice';
+    else db.att.push({lessonId,studentId:s.id,status:'practice'});
+    count++;
+  });
+  save(); toast(count?(`已将 ${count} 名生理期女生标记为见习`):'当天没有处于预测生理期的女生'); render();
+}
+
+function vStats(){
+  const backupCard = `<div class="card"><div class="card-h"><h2>数据备份与迁移</h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-sm" onclick="exportAllData()">导出全部数据(JSON)</button>
+      <button class="btn btn-sm" onclick="importAllData()">导入全部数据(JSON)</button>
+    </div></div><div class="card-b">
+    <div class="hint">在电脑、手机之间迁移数据：先在一台设备点「导出全部数据」下载 JSON 备份文件，把文件传到另一台设备，再点「导入全部数据」选择该文件，即可完整恢复班级、学生、考勤与生理期记录。<b style="color:#dc2626">注意：导入会覆盖当前全部数据</b>，导入前请先导出备份。</div>
+  </div></div>`;
+  if(!db.classes.length) return emptyState('还没有数据', '先添加班级、学生并完成课时标记，即可查看统计和导出。') + backupCard;
+  const qp = new URLSearchParams(location.hash.split('?')[1]||'');
+  let cid = qp.get('c') && db.classes.some(c=>c.id===qp.get('c')) ? qp.get('c') : db.classes[0].id;
+  const cls = db.classes.find(c=>c.id===cid);
+  const stus = studentsOf(cid);
+  const lessons = db.lessons.filter(l=>l.classId===cid).sort((a,b)=>b.date.localeCompare(a.date));
+  const rows = stus.map(s=>{
+    const sum={present:0,practice:0,leave_sick:0,leave_affair:0,absent:0};
+    db.att.forEach(a=>{ if(a.studentId===s.id && a.lessonId && lessons.some(l=>l.id===a.lessonId) && STATUS[a.status]) sum[a.status]++; });
+    const total = lessons.length;
+    const attended = sum.present;
+    const rate = total? Math.round(attended/total*100):0;
+    return {...s, sum, total, attended, rate};
+  });
+  const csum={present:0,practice:0,leave_sick:0,leave_affair:0,absent:0};
+  rows.forEach(r=>{ csum.present+=r.sum.present; csum.practice+=r.sum.practice; csum.leave_sick+=r.sum.leave_sick; csum.leave_affair+=r.sum.leave_affair; csum.absent+=r.sum.absent; });
+  let html = `<div class="filter-bar">
+      <span class="hint">选择班级：</span>
+      ${db.classes.map(c=>`<button class="chip ${c.id===cid?'active':''}" onclick="location.hash='#/stats?c=${c.id}'">${esc(c.name)}</button>`).join('')}
+    </div>`;
+  html += `<div class="stats">
+    <div class="stat total"><div class="v">${stus.length}</div><div class="l">学生数</div></div>
+    <div class="stat total"><div class="v">${lessons.length}</div><div class="l">课时数</div></div>
+    <div class="stat ok"><div class="v">${csum.present}</div><div class="l">已到</div></div>
+    <div class="stat practice"><div class="v">${csum.practice}</div><div class="l">见习</div></div>
+    <div class="stat leave"><div class="v">${csum.leave_sick+csum.leave_affair}</div><div class="l">请假</div></div>
+    <div class="stat absent"><div class="v">${csum.absent}</div><div class="l">缺席</div></div>
+  </div>`;
+  html += `<div class="card"><div class="card-h"><h2>${esc(cls.name)} · 学期出勤汇总</h2>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-sm" onclick="exportLesson('${cid}')">导出单节课表(Excel)</button>
+      <button class="btn btn-sm btn-primary" onclick="exportSummary('${cid}')">导出汇总 Excel</button>
+    </div></div><div class="card-b">`;
+  if(!stus.length){ html += `<div class="empty">该班级暂无学生。</div>`; }
+  else if(!lessons.length){ html += `<div class="empty">该班级还没有课时记录，先到「课时考勤」创建并标记。</div>`; }
+  else {
+    html += `<div class="table-wrap"><table><thead><tr><th>序号</th><th>姓名</th><th>性别</th><th>已到</th><th>见习</th><th>病假</th><th>事假</th><th>缺席</th><th>应到</th><th>出勤率</th></tr></thead><tbody>`;
+    rows.forEach(r=>{
+      html += `<tr><td class="num">${esc(r.no)}</td><td>${esc(r.name)}</td><td>${esc(r.gender||'—')}</td>
+        <td class="num">${r.sum.present}</td><td class="num">${r.sum.practice}</td><td class="num">${r.sum.leave_sick}</td><td class="num">${r.sum.leave_affair}</td><td class="num">${r.sum.absent}</td>
+        <td class="num">${r.total}</td>
+        <td><span class="pill ${r.rate>=80?'present':r.rate>=60?'practice':'absent'}">${r.rate}%</span></td></tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+  html += `</div></div>`;
+  if(lessons.length){
+    html += `<div class="card"><div class="card-h"><h2>单节课考勤表</h2></div><div class="card-b">`;
+    html += `<div class="table-wrap"><table><thead><tr><th>序号</th><th>姓名</th><th>性别</th>${lessons.map(l=>`<th>${esc(formatDateDot(l.date))}${l.note?'<br><span style="font-weight:400">'+esc(l.note)+'</span>':''}</th>`).join('')}</tr></thead><tbody>`;
+    stus.forEach(s=>{
+      html += `<tr><td class="num">${esc(s.no)}</td><td>${esc(s.name)}</td><td>${esc(s.gender||'—')}</td>`;
+      lessons.forEach(l=>{
+        const a=db.att.find(x=>x.lessonId===l.id&&x.studentId===s.id);
+        const label = (a&&STATUS[a.status]) ? STATUS[a.status].label : '未标记';
+        const clsName = (a&&STATUS[a.status]) ? STATUS[a.status].cls : 'none';
+        html += `<td><span class="pill ${clsName}">${label}</span></td>`;
+      });
+      html += `</tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+  }
+  return html + backupCard;
+}
+
+// ===== 数据备份与迁移（JSON 导出/导入） =====
+function exportAllData(){
+  const payload = {app:'pe_attendance_v2', exportedAt:new Date().toISOString().slice(0,10), data:db};
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '体育课出勤数据备份_' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 3000);
+  toast('已导出全部数据（JSON 备份文件）');
+}
+function importAllData(){
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json,application/json';
+  input.onchange = function(){
+    const f = input.files && input.files[0];
+    if(!f) return;
+    const reader = new FileReader();
+    reader.onload = function(){
+      try{
+        const obj = JSON.parse(reader.result);
+        const d = obj && typeof obj === 'object' && obj.data ? obj.data : obj;
+        if(!d || !Array.isArray(d.classes) || !Array.isArray(d.students)){
+          toast('文件格式不正确：请选择本工具导出的 JSON 备份文件');
+          return;
+        }
+        const newDb = {
+          classes: Array.isArray(d.classes)?d.classes:[],
+          students: Array.isArray(d.students)?d.students:[],
+          lessons: Array.isArray(d.lessons)?d.lessons:[],
+          att: Array.isArray(d.att)?d.att:[],
+          periods: Array.isArray(d.periods)?d.periods:[]
+        };
+        if(!confirm(`导入将覆盖当前全部数据（当前 ${db.classes.length} 个班级、${db.students.length} 名学生），确定继续吗？`)) return;
+        db = newDb;
+        save();
+        render();
+        toast('数据导入成功');
+      }catch(e){
+        toast('导入失败：文件不是有效的 JSON');
+      }
+    };
+    reader.readAsText(f);
+  };
+  input.click();
+}
+
+// ===== 生理期统计视图 =====
+function vPeriods(){
+  if(!db.classes.length) return emptyState('还没有班级', '请先到「班级与名单」添加班级和学生。');
+  const qp = new URLSearchParams(location.hash.split('?')[1]||'');
+  let cid = qp.get('c') && db.classes.some(c=>c.id===qp.get('c')) ? qp.get('c') : db.classes[0].id;
+  const cls = db.classes.find(c=>c.id===cid);
+  const girls = studentsOf(cid).filter(s=>s.gender==='女');
+  const today = new Date().toISOString().slice(0,10);
+  const onToday = girls.filter(s=>isOnPeriod(s.id,today)).length;
+  const recorded = girls.filter(s=>periodInfo(s.id)).length;
+  const weekPractice = girls.filter(s=>{ const p=periodInfo(s.id); if(!p) return false; for(let i=0;i<7;i++){ if(isOnPeriod(s.id, daysAdd(today,i))) return true; } return false; }).length;
+
+  let html = `<div class="filter-bar">
+      <span class="hint">选择班级：</span>
+      ${db.classes.map(c=>`<button class="chip ${c.id===cid?'active':''}" onclick="location.hash='#/periods?c=${c.id}'">${esc(c.name)}</button>`).join('')}
+    </div>`;
+  html += `<div class="stats">
+    <div class="stat total"><div class="v">${girls.length}</div><div class="l">女生人数</div></div>
+    <div class="stat total"><div class="v">${recorded}</div><div class="l">已记录生理期</div></div>
+    <div class="stat pink"><div class="v">${onToday}</div><div class="l">今日处于生理期</div></div>
+    <div class="stat practice"><div class="v">${weekPractice}</div><div class="l">预计本周需见习</div></div>
+  </div>`;
+  html += `<div class="card"><div class="card-h"><h2>${esc(cls.name)} · 生理期记录</h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-sm" onclick="exportPeriods('${cid}')">导出 Excel</button>
+    </div></div><div class="card-b">`;
+  if(!girls.length){
+    html += `<div class="empty">该班暂无「女」性别学生。可到「班级与名单」为学生填写性别后，再来这里记录生理期。</div>`;
+  } else {
+    html += `<div class="table-wrap"><table><thead><tr><th>序号</th><th>姓名</th><th>最近开始日期</th><th>持续天数</th><th>周期天数</th><th>预计下次开始</th><th>今日状态</th><th style="width:90px"></th></tr></thead><tbody>`;
+    girls.forEach(s=>{
+      const p = periodInfo(s.id);
+      const onT = p && isOnPeriod(s.id,today);
+      const next = p ? nextPeriodStart(s.id) : null;
+      let statusHtml = !p ? '<span class="pill none">未记录</span>'
+        : (onT ? '<span class="pill pink">生理期中</span>' : '<span class="pill present">正常</span>');
+      html += `<tr>
+        <td class="num">${esc(s.no)}</td><td>${esc(s.name)}</td>
+        <td class="num">${p?esc(p.startDate):'—'}</td>
+        <td class="num">${p?p.duration:'—'}</td>
+        <td class="num">${p?p.cycleDays:'—'}</td>
+        <td class="num">${next?esc(formatDateDot(next)):'—'}</td>
+        <td>${statusHtml}</td>
+        <td><div style="display:flex;gap:2px">
+          <button class="btn btn-sm" onclick="openPeriodModal('${cid}','${s.id}')">${p?'修改':'记录'}</button>
+          ${p?`<button class="icon-btn" title="清除记录" onclick="clearPeriod('${s.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14" /></svg></button>`:''}
+        </div></td></tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+  html += `</div></div>`;
+  html += `<div class="card"><div class="card-b"><div class="hint">说明：记录每位女生最近一次生理期开始日期、持续天数与平均周期天数后，系统会按周期自动预测后续生理期。在「课时考勤」标记时，处于预测生理期的女生会显示粉色提示，可一键批量标为「见习」，便于统计见习次数。请定期更新「最近开始日期」以获得准确预测。</div></div></div>`;
+  return html;
+}
+function openPeriodModal(cid, sid){
+  const p = periodInfo(sid);
+  const s = db.students.find(x=>x.id===sid);
+  openModal(`<h3>${p?'修改':'记录'}生理期 · ${s?esc(s.name):''}</h3>`,
+    `<div class="field"><label>最近一次生理期开始日期</label><input type="date" id="pfStart" value="${p?esc(p.startDate):''}"></div>
+     <div class="field" style="margin-top:12px"><label>持续天数（通常 3-7）</label><input type="number" id="pfDuration" min="1" max="15" value="${p?p.duration:5}"></div>
+     <div class="field" style="margin-top:12px"><label>平均周期天数（通常 21-35，默认 28）</label><input type="number" id="pfCycle" min="15" max="60" value="${p?p.cycleDays:28}"></div>`,
+    `<button class="btn" onclick="closeModal()">取消</button>
+     <button class="btn btn-primary" onclick="savePeriod('${sid}')">保存</button>`);
+}
+function savePeriod(studentId){
+  const start = document.getElementById('pfStart').value.trim();
+  const duration = parseInt(document.getElementById('pfDuration').value,10)||5;
+  const cycle = parseInt(document.getElementById('pfCycle').value,10)||28;
+  if(!start){ toast('请选择开始日期'); return; }
+  if(!db.periods) db.periods = [];
+  const idx = db.periods.findIndex(x=>x.studentId===studentId);
+  if(idx>-1) db.periods[idx] = {studentId, startDate:start, duration, cycleDays:cycle};
+  else db.periods.push({studentId, startDate:start, duration, cycleDays:cycle});
+  save(); closeModal(); toast('生理期记录已保存'); render();
+}
+function clearPeriod(studentId){
+  if(!confirm('清除该学生的生理期记录？')) return;
+  db.periods = (db.periods||[]).filter(x=>x.studentId!==studentId);
+  save(); toast('已清除记录'); render();
+}
+function exportPeriods(cid){
+  const girls = studentsOf(cid).filter(s=>s.gender==='女');
+  if(!girls.length){ toast('该班暂无女学生'); return; }
+  const today = new Date().toISOString().slice(0,10);
+  const rows = [[`${className(cid)}学生生理期统计表`]];
+  rows.push(['序号','姓名','最近生理期开始','持续天数','周期天数','预计下次开始','今日状态']);
+  girls.forEach(s=>{
+    const p = periodInfo(s.id);
+    const next = p ? nextPeriodStart(s.id) : '';
+    const status = !p ? '' : (isOnPeriod(s.id,today)?'生理期中':'正常');
+    rows.push([s.no, s.name, p?p.startDate:'', p?p.duration:'', p?p.cycleDays:'', next?formatDateDot(next):'', status]);
+  });
+  downloadXls(`${className(cid)}学生生理期统计表.xls`, rows, false);
+  toast('生理期统计已导出');
+}
+
+function openClassModal(id){
+  const c = id? db.classes.find(x=>x.id===id):null;
+  openModal(`<h3>${c?'重命名班级':'添加班级'}</h3>`,
+    `<div class="field"><label>班级名称</label><input id="cfName" placeholder="如：七年级1班" value="${c?esc(c.name):''}"></div>`,
+    `<button class="btn" onclick="closeModal()">取消</button>
+     <button class="btn btn-primary" onclick="${c?`saveClass('${c.id}')`:'saveClass()'}">保存</button>`);
+  setTimeout(()=>{const i=document.getElementById('cfName'); if(i)i.focus();},60);
+}
+function saveClass(id){
+  const name = document.getElementById('cfName').value.trim();
+  if(!name){ toast('请输入班级名称'); return; }
+  if(id){ const c=db.classes.find(x=>x.id===id); c.name=name; toast('已保存'); }
+  else { db.classes.push({id:uid(),name}); toast('已添加班级'); }
+  save(); closeModal(); render();
+}
+function delClass(id){
+  if(!confirm(`删除「${className(id)}」会同时删除该班学生和全部考勤记录，确定删除吗？`)) return;
+  db.classes = db.classes.filter(c=>c.id!==id);
+  db.students = db.students.filter(s=>s.classId!==id);
+  const lids = new Set(db.lessons.filter(l=>l.classId===id).map(l=>l.id));
+  db.lessons = db.lessons.filter(l=>l.classId!==id);
+  db.att = db.att.filter(a=>!lids.has(a.lessonId));
+  const sids = new Set(db.students.filter(s=>s.classId===id).map(s=>s.id));
+  db.periods = (db.periods||[]).filter(p=>!sids.has(p.studentId));
+  save(); toast('已删除班级'); render();
+}
+function openStudentModal(cid, id){
+  const s = id? db.students.find(x=>x.id===id):null;
+  openModal(`<h3>${s?'编辑学生':'添加学生'}</h3>`,
+    `<div class="field"><label>序号</label><input id="sfNo" value="${s?esc(s.no):''}" placeholder="如：1"></div>
+     <div class="field" style="margin-top:12px"><label>姓名</label><input id="sfName" value="${s?esc(s.name):''}" placeholder="学生姓名"></div>
+     <div class="field" style="margin-top:12px"><label>性别</label>
+       <select id="sfGender">
+         <option value="">选择性别</option>
+         <option value="男" ${s&&s.gender==='男'?'selected':''}>男</option>
+         <option value="女" ${s&&s.gender==='女'?'selected':''}>女</option>
+       </select></div>`,
+    `<button class="btn" onclick="closeModal()">取消</button>
+     <button class="btn btn-primary" onclick="${s?`saveStudent('${cid}','${s.id}')`:`saveStudent('${cid}')`}">保存</button>`);
+  setTimeout(()=>{const i=document.getElementById('sfNo'); if(i)i.focus();},60);
+}
+function saveStudent(cid, id){
+  const no = document.getElementById('sfNo').value.trim();
+  const name = document.getElementById('sfName').value.trim();
+  const gender = document.getElementById('sfGender').value;
+  if(!no||!name){ toast('序号和姓名都要填写'); return; }
+  if(id){ const s=db.students.find(x=>x.id===id); s.no=no; s.name=name; s.gender=gender; toast('已保存'); }
+  else { db.students.push({id:uid(),classId:cid,no,name,gender}); toast('已添加学生'); }
+  save(); closeModal(); render();
+}
+function delStudent(id){
+  if(!confirm('确定删除该学生吗？相关考勤记录也会一并清除。')) return;
+  db.students = db.students.filter(s=>s.id!==id);
+  db.att = db.att.filter(a=>a.studentId!==id);
+  db.periods = (db.periods||[]).filter(p=>p.studentId!==id);
+  save(); toast('已删除学生'); render();
+}
+function openImport(cid){
+  openModal(`<h3>批量导入学生名单</h3>`,
+    `<div class="hint" style="margin-bottom:10px">粘贴名单，每行一位学生，格式：<b>序号,姓名,性别</b>（逗号或 Tab 分隔，可整列从 Excel 复制）。</div>
+     <textarea id="impText" rows="8" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;resize:vertical" placeholder="1,张三,男&#10;2,李四,女&#10;3,王五,男"></textarea>`,
+    `<button class="btn" onclick="closeModal()">取消</button>
+     <button class="btn btn-primary" onclick="doImport('${cid}')">导入</button>`);
+}
+function doImport(cid){
+  const text = document.getElementById('impText').value.trim();
+  if(!text){ toast('请粘贴名单内容'); return; }
+  let count=0, skip=0;
+  text.split(/\n/).forEach(line=>{
+    line=line.trim(); if(!line) return;
+    const parts = line.split(/[\t,，]+/).map(x=>x.trim()).filter(Boolean);
+    if(parts.length<2) { skip++; return; }
+    const no=parts[0], name=parts[1], gender=(parts[2]||'').trim();
+    if(db.students.some(s=>s.classId===cid&&s.no===no)) { skip++; return; }
+    db.students.push({id:uid(),classId:cid,no,name,gender}); count++;
+  });
+  save(); closeModal();
+  toast(count?('导入成功 '+count+' 人'+(skip?('，跳过 '+skip+' 条'):'')):'没有可导入的数据');
+  render();
+}
+function createLesson(){
+  const classId = document.getElementById('newLessonClass').value;
+  let date = document.getElementById('newLessonDate').value.trim();
+  lessonDraftDate = date;
+  const note = document.getElementById('newLessonNote').value.trim();
+  if(!date){ date = new Date().toISOString().slice(0,10); }
+  const l = {id:uid(), classId, date, note};
+  db.lessons.push(l); save();
+  toast('课时已创建'); render();
+  location.hash = '#/lessons?open='+l.id;
+}
+function delLesson(id){
+  if(!confirm('删除该课时及其考勤记录？')) return;
+  db.lessons = db.lessons.filter(l=>l.id!==id);
+  db.att = db.att.filter(a=>a.lessonId!==id);
+  save(); toast('已删除课时'); render();
+}
+function setAtt(lessonId, studentId, status){
+  const idx = db.att.findIndex(a=>a.lessonId===lessonId&&a.studentId===studentId);
+  if(idx>-1){
+    if(db.att[idx].status===status){ db.att.splice(idx,1); }
+    else db.att[idx].status=status;
+  } else {
+    db.att.push({lessonId,studentId,status});
+  }
+  save(); render();
+}
+function bulkSet(lessonId, status){
+  const l = lessonOf(lessonId);
+  const stus = studentsOf(l.classId);
+  stus.forEach(s=>{
+    const idx = db.att.findIndex(a=>a.lessonId===lessonId&&a.studentId===s.id);
+    if(status===null){
+      if(idx>-1) db.att.splice(idx,1);
+    } else if(idx>-1){ db.att[idx].status=status; }
+    else db.att.push({lessonId,studentId:s.id,status});
+  });
+  save(); toast(status?`已将全部学生标记为「${STATUS[status].label}」`:'已清空全部标记'); render();
+}
+
+function exportSummary(cid){
+  const stus = studentsOf(cid);
+  const lessons = db.lessons.filter(l=>l.classId===cid);
+  if(!stus.length||!lessons.length){ toast('暂无可导出的数据'); return; }
+  const head = ['序号','姓名','性别','已到','见习','病假','事假','缺席','应到课时','出勤率'];
+  const rows = [[`${className(cid)}体育课考勤表`]];
+  rows.push(head);
+  stus.forEach(s=>{
+    const sum={present:0,practice:0,leave_sick:0,leave_affair:0,absent:0};
+    db.att.forEach(a=>{ if(a.studentId===s.id&&lessons.some(l=>l.id===a.lessonId)&&STATUS[a.status]) sum[a.status]++; });
+    const total=lessons.length; const attended=sum.present;
+    rows.push([s.no, s.name, s.gender||'', sum.present, sum.practice, sum.leave_sick, sum.leave_affair, sum.absent, total, (total?Math.round(attended/total*100):0)+'%']);
+  });
+  downloadXls(`${className(cid)}体育课考勤表.xls`, rows, false);
+  toast('汇总已导出');
+}
+
+function exportLesson(cid){
+  const lessons = db.lessons.filter(l=>l.classId===cid).sort((a,b)=>a.date.localeCompare(b.date));
+  if(!lessons.length){ toast('该班级还没有课时'); return; }
+  const stus = studentsOf(cid);
+  const head = ['序号','姓名','性别'];
+  lessons.forEach(l=>head.push(`${formatDateDot(l.date)}${l.note?' '+l.note:''}`));
+  const rowData = [];
+  stus.forEach(s=>{
+    const base = [s.no,s.name,s.gender||''];
+    const styleIdList = [];
+    lessons.forEach(l=>{
+      const a=db.att.find(x=>x.lessonId===l.id&&x.studentId===s.id);
+      const stKey = a?.status;
+      const label = (a&&STATUS[stKey]) ? STATUS[stKey].label : '未标记';
+      base.push(label);
+      if(stKey && STATUS[stKey]){
+        styleIdList.push(STATUS[stKey].excelStyleId);
+      }else{
+        styleIdList.push('s_normal');
+      }
+    })
+    rowData.push({cells:base, styles:styleIdList});
+  });
+  downloadXls(`${className(cid)}单节课考勤表.xls`, rowData, true);
+  toast('单节课表已导出Excel');
+}
+
+// 修复：预先定义单元格样式ID，使用Style ss:ID引用实现字体颜色
+function downloadXls(filename, data, isColorSheet){
+  let rows;
+  let cellStyles = [];
+  if(isColorSheet){
+    rows = [[filename.replace('.xls','')]];
+    const cidRaw = filename.replace('单节课考勤表.xls','').replace('体育课考勤表.xls','').trim();
+    const lessons = db.lessons.filter(l=>l.classId===db.classes.find(c=>c.name===cidRaw)?.id).sort((a,b)=>a.date.localeCompare(b.date));
+    const firstRow = ['序号','姓名','性别'];
+    lessons.forEach(l=>firstRow.push(`${formatDateDot(l.date)}${l.note?' '+l.note:''}`));
+    rows.push(firstRow);
+    data.forEach(d=>{
+      rows.push(d.cells);
+      cellStyles.push(d.styles);
+    })
+  }else{
+    rows = data;
+  }
+
+  const totalCols = Math.max.apply(null, rows.map(r=>r.length)) || 1;
+  const escXml = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const isNum = s => /^-?\d+(\.\d+)?$/.test(String(s==null?'':s));
+
+  let xml = `<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+<Styles>
+<Style ss:ID="Default" ss:Name="Normal"><Alignment ss:Vertical="Center" /><Font ss:FontName="宋体" ss:Size="11" /></Style>
+<Style ss:ID="Title"><Alignment ss:Horizontal="Center" ss:Vertical="Center" /><Font ss:FontName="宋体" ss:Size="16" ss:Bold="1" /></Style>
+<Style ss:ID="Header"><Alignment ss:Horizontal="Center" ss:Vertical="Center" /><Font ss:FontName="宋体" ss:Bold="1" /></Style>
+<Style ss:ID="Cell"><Alignment ss:Vertical="Center" /></Style>
+<Style ss:ID="s_normal"><Alignment ss:Vertical="Center" /><Font ss:FontName="宋体" ss:Size="11" ss:Color="#000000"/></Style>
+<Style ss:ID="s_green"><Alignment ss:Vertical="Center" /><Font ss:FontName="宋体" ss:Size="11" ss:Color="#16a34a"/></Style>
+<Style ss:ID="s_orange"><Alignment ss:Vertical="Center" /><Font ss:FontName="宋体" ss:Size="11" ss:Color="#d97706"/></Style>
+<Style ss:ID="s_blue"><Alignment ss:Vertical="Center" /><Font ss:FontName="宋体" ss:Size="11" ss:Color="#2563eb"/></Style>
+<Style ss:ID="s_red"><Alignment ss:Vertical="Center" /><Font ss:FontName="宋体" ss:Size="11" ss:Color="#dc2626"/></Style>
+</Styles>
+<Worksheet ss:Name="体育课考勤表">
+<Table>`;
+  const title = rows[0] && rows[0][0] != null ? String(rows[0][0]) : '';
+  const merge = totalCols - 1;
+  xml += `<Row ss:Height="28"><Cell ss:StyleID="Title" ss:MergeAcross="${merge}"><Data ss:Type="String">${escXml(title)}</Data></Cell></Row>`;
+
+  for(let i=1;i<rows.length;i++){
+    const r = rows[i];
+    xml += '<Row>';
+    for(let j=0;j<totalCols;j++){
+      const v = r[j];
+      let styleId = 'Cell';
+      if(i===1){
+        styleId = 'Header';
+      }else if(isColorSheet && i>=2 && j>=3){
+        const cIdx = i-2;
+        styleId = cellStyles[cIdx]?.[j-3] || 's_normal';
+      }
+      if(v==null||v===''){
+        xml += `<Cell ss:StyleID="${styleId}" />`;
+        continue;
+      }
+      xml += `<Cell ss:StyleID="${styleId}"><Data ss:Type="${isNum(v)?'Number':'String'}">${isNum(v)?String(v):escXml(v)}</Data></Cell>`;
+    }
+    xml += '</Row>';
+  }
+  xml += `</Table></Worksheet></Workbook>`;
+  const blob = new Blob(['\ufeff'+xml], {type:'application/vnd.ms-excel;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download=filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+
+function openModal(titleHtml, bodyHtml, footHtml){
+  document.getElementById('modal').innerHTML = `<div class="modal-h"><h3>${titleHtml}</h3><button class="icon-btn" onclick="closeModal()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12" /></svg></button></div><div class="modal-b">${bodyHtml}</div><div class="modal-f">${footHtml}</div>`;
+  document.getElementById('modalMask').classList.add('show');
+}
+function closeModal(){ document.getElementById('modalMask').classList.remove('show'); }
+function closeSide(){ document.getElementById('side').classList.remove('open'); document.getElementById('overlay').classList.remove('show'); }
+function bind(){
+  document.getElementById('hamb').onclick = ()=>{ document.getElementById('side').classList.add('open'); document.getElementById('overlay').classList.add('show'); };
+  document.getElementById('overlay').onclick = closeSide;
+  const dateInput = document.getElementById('newLessonDate');
+  if(dateInput){
+    dateInput.onchange = function(){
+      lessonDraftDate = this.value;
+    }
+  }
+}
+document.getElementById('modalMask').addEventListener('click', e=>{ if(e.target.id==='modalMask') closeModal(); });
+window.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+window.addEventListener('hashchange', router);
+router();
+</script>
+</body>
+</html>
