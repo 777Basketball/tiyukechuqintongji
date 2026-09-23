@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>跳绳成绩登记簿</title>
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap">
+<style>
+/* ===== 设计令牌 ===== */
+:root{
+  --bg:#F5F2EA;
+  --surface:#FFFFFF;
+  --surface-2:#FBF9F4;
+  --ink:#23282F;
+  --ink-2:#4B5563;
+  --muted:#8A8F98;
+  --line:#E7E1D3;
+  --line-strong:#D8D0BD;
+  --accent:#E4572E;
+  --accent-deep:#C7431F;
+  --accent-soft:#FBE8E1;
+  --green:#2F9E63;
+  --green-soft:#E3F3EA;
+  --red:#D64545;
+  --red-soft:#FBE5E5;
+  --gold:#D99A2B;
+  --gold-soft:#F8EEDC;
+  --blue:#3B6FB6;
+  --serif:'Noto Serif SC','Songti SC','SimSun',serif;
+  --sans:'Noto Sans SC','PingFang SC','Microsoft YaHei','Hiragino Sans GB',sans-serif;
+  --mono:ui-monospace,'SF Mono','Cascadia Mono','Consolas','Menlo',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:var(--sans);
+  background:var(--bg);
+  color:var(--ink);
+  min-width:1080px;
+  font-size:14px;
+  line-height:1.55;
+}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:14px;color:var(--ink)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ===== 布局 ===== */
+.app{display:flex;min-height:100vh}
+.sidebar{
+  width:236px;flex:none;background:#EFEAE0;border-right:1px solid var(--line);
+  display:flex;flex-direction:column;padding:22px 14px;position:sticky;top:0;height:100vh;
+}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 8px 18px;border-bottom:1px solid var(--line-strong)}
+.brand-mark{
+  width:34px;height:34px;flex:none;border-radius:9px;background:var(--ink);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+}
+.brand-name{font-family:var(--serif);font-weight:700;font-size:17px;letter-spacing:.5px}
+.nav{display:flex;flex-direction:column;gap:4px;margin-top:18px}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;color:var(--ink-2);
+  font-weight:500;border-left:3px solid transparent;
+}
+.nav-item:hover{background:rgba(228,87,46,.08);color:var(--ink)}
+.nav-item.active{background:var(--surface);color:var(--accent-deep);font-weight:700;border-left-color:var(--accent);box-shadow:0 1px 2px rgba(35,40,47,.05)}
+.nav-item svg{width:18px;height:18px;flex:none}
+.sidebar-foot{margin-top:auto;padding:12px 8px;color:var(--muted);font-size:12px;line-height:1.6;border-top:1px solid var(--line)}
+
+.main{flex:1;min-width:0;padding:30px 36px 60px}
+.page-head{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.page-head h1{font-family:var(--serif);font-size:26px;font-weight:900;letter-spacing:.5px}
+.page-head .sub{color:var(--muted);font-size:13px;padding-bottom:4px}
+.back-link{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:13px;margin-bottom:10px}
+.back-link:hover{color:var(--accent)}
+.head-actions{margin-left:auto;display:flex;gap:8px}
+
+/* ===== 通用组件 ===== */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:8px 14px;border-radius:9px;border:1px solid var(--line-strong);background:var(--surface);
+  color:var(--ink);font-weight:500;font-size:13.5px;transition:background .15s,border-color .15s;
+}
+.btn:hover{border-color:var(--accent);color:var(--accent-deep)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.btn.primary:hover{background:var(--accent-deep);border-color:var(--accent-deep);color:#fff}
+.btn.danger{color:var(--red);border-color:#EBC5C5}
+.btn.danger:hover{background:var(--red-soft);border-color:var(--red)}
+.btn.sm{padding:4px 10px;font-size:12.5px;border-radius:7px}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--ink-2)}
+.btn.ghost:hover{border-color:transparent;background:var(--surface-2);color:var(--accent-deep)}
+.icon-btn{
+  display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border:none;
+  background:transparent;border-radius:8px;color:var(--muted);
+}
+.icon-btn:hover{background:var(--surface-2);color:var(--ink)}
+.icon-btn svg{width:17px;height:17px}
+.hint{color:var(--muted);font-size:12.5px}
+
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.stat-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden}
+.stat-card .tick-strip{position:absolute;top:0;left:0;right:0}
+.stat-card .k{color:var(--muted);font-size:12.5px;margin-bottom:6px}
+.stat-card .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:30px;font-weight:700;letter-spacing:-.5px}
+.stat-card .v small{font-size:14px;color:var(--muted);font-weight:500;margin-left:2px}
+.stat-card .d{color:var(--muted);font-size:12px;margin-top:4px}
+
+.tick-strip{height:5px;background:repeating-linear-gradient(90deg,var(--accent) 0 2px,transparent 2px 7px)}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.chip{display:inline-flex;align-items:center;gap:4px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:12.5px;color:var(--ink-2)}
+.chip b{color:var(--ink);font-family:var(--mono);font-variant-numeric:tabular-nums}
+.chip.hl{border-color:var(--accent);color:var(--accent-deep);background:var(--accent-soft)}
+
+.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700}
+.badge.exc{background:var(--green-soft);color:var(--green)}
+.badge.ok{background:var(--gold-soft);color:#A8741C}
+.badge.fail{background:var(--red-soft);color:var(--red)}
+.badge.none{background:#EFEBE2;color:var(--muted)}
+
+/* ===== 班级总览 ===== */
+.class-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.class-card{
+  display:block;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+  transition:transform .15s,box-shadow .15s,border-color .15s;
+}
+.class-card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(35,40,47,.07);border-color:var(--line-strong)}
+.class-card-body{padding:16px 18px 14px}
+.class-card h3{font-family:var(--serif);font-size:18px;font-weight:700;margin-bottom:4px}
+.class-meta{color:var(--muted);font-size:12.5px;margin-bottom:12px}
+.class-nums{display:flex;gap:18px;border-top:1px dashed var(--line);padding-top:11px}
+.class-nums span{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column}
+.class-nums b{color:var(--ink);font-size:17px;font-family:var(--mono);font-variant-numeric:tabular-nums;margin-top:2px}
+
+.empty-state{
+  border:2px dashed var(--line-strong);border-radius:14px;padding:56px 32px;text-align:center;background:var(--surface-2);
+}
+.empty-state h3{font-size:17px;margin-bottom:8px}
+.empty-state p{color:var(--muted);font-size:13px;max-width:480px;margin:0 auto 18px}
+.empty-state .row{display:flex;gap:10px;justify-content:center}
+
+/* ===== 页签 ===== */
+.tab-bar{display:flex;gap:2px;border-bottom:2px solid var(--line);margin-bottom:22px}
+.tab{
+  padding:10px 18px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;
+}
+.tab:hover{color:var(--ink)}
+.tab.active{color:var(--accent-deep);border-bottom-color:var(--accent)}
+
+/* ===== 成绩录入 ===== */
+.entry-top{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+.test-list{display:flex;flex-direction:column;gap:14px}
+.test-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.test-card-main{display:flex;align-items:center;gap:20px;padding:16px 20px}
+.test-date{flex:none;text-align:center;width:74px;border-right:1px dashed var(--line);padding-right:16px}
+.date-big{display:block;font-size:26px;font-weight:700;color:var(--accent-deep);line-height:1.1}
+.date-year{color:var(--muted);font-size:12px}
+.test-info{flex:1;min-width:0}
+.test-info h3{font-size:15.5px;font-weight:700;margin-bottom:8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.test-actions{flex:none;display:flex;gap:8px}
+
+/* ===== 统计 ===== */
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.chart-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 18px 12px}
+.chart-card.full{grid-column:1 / -1}
+.chart-head{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
+.chart-head h3{font-size:15px;font-weight:700}
+.chart-head .chart-sub{color:var(--muted);font-size:12px}
+.chart{width:100%;min-height:300px}
+.chart-empty{
+  min-height:300px;display:flex;align-items:center;justify-content:center;color:var(--muted);
+  background:var(--surface-2);border-radius:10px;border:1px dashed var(--line-strong);font-size:13px;text-align:center;padding:20px;
+}
+.stu-picker{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.stu-chip{
+  padding:5px 12px;border-radius:999px;border:1px solid var(--line-strong);background:var(--surface-2);
+  color:var(--ink-2);font-size:13px;font-weight:500;
+}
+.stu-chip:hover{border-color:var(--accent)}
+.stu-chip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+
+/* ===== 表格 ===== */
+.table-wrap{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+table.tbl{width:100%;border-collapse:collapse}
+.tbl th{
+  text-align:left;padding:11px 16px;background:var(--surface-2);color:var(--muted);font-size:12px;
+  font-weight:700;border-bottom:1px solid var(--line);letter-spacing:.3px;
+}
+.tbl td{padding:10px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:#FCFAF4}
+.tbl .ops{white-space:nowrap}
+.tbl .ops .btn{margin-right:6px}
+
+/* ===== 表单 ===== */
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.field > span{font-size:12.5px;font-weight:700;color:var(--ink-2)}
+.field input,.field select,.field textarea{
+  border:1px solid var(--line-strong);border-radius:9px;padding:9px 12px;background:var(--surface);
+}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(228,87,46,.12)}
+.field .help{font-size:12px;color:var(--muted)}
+.add-student-row{display:flex;gap:10px;align-items:flex-end;margin-bottom:14px}
+.add-student-row .field{flex:none;margin-bottom:0}
+.add-student-row .field.grow{flex:1}
+.add-student-row .field.grow input{width:100%}
+
+/* ===== 模态 ===== */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(35,40,47,.45);display:flex;align-items:flex-start;justify-content:center;
+  padding:60px 24px 40px;z-index:50;overflow:auto;
+}
+.modal{background:var(--surface);border-radius:14px;width:640px;max-width:100%;box-shadow:0 20px 60px rgba(35,40,47,.22)}
+.modal.wide{width:960px}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid var(--line)}
+.modal-head h3{font-family:var(--serif);font-size:17px;font-weight:700}
+.modal-head .sub{font-size:12.5px;color:var(--muted);font-weight:400;margin-left:10px}
+.modal-body{padding:20px 22px;max-height:62vh;overflow:auto}
+.modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 22px;border-top:1px solid var(--line);background:var(--surface-2);border-radius:0 0 14px 14px}
+
+/* ===== 成绩录入表 ===== */
+.entry-summary{
+  display:flex;gap:8px;flex-wrap:wrap;margin:16px 22px 12px;
+}
+.count-input{width:96px;padding:7px 10px;border:1px solid var(--line-strong);border-radius:8px;text-align:center;font-family:var(--mono);font-size:14px}
+.count-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(228,87,46,.12)}
+.count-input.empty{background:#F6F3EA;color:var(--muted)}
+
+/* ===== 设置 / 数据 ===== */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px 24px;margin-bottom:18px}
+.panel h3{font-size:15.5px;font-weight:700;margin-bottom:4px}
+.panel .p-sub{color:var(--muted);font-size:12.5px;margin-bottom:16px}
+.panel-row{display:flex;gap:24px;flex-wrap:wrap}
+.num-input{width:140px}
+.data-actions{display:flex;flex-direction:column;gap:12px;max-width:520px}
+.data-actions .row{display:flex;gap:10px;align-items:center}
+.data-actions .row .desc{color:var(--muted);font-size:12.5px}
+
+/* ===== 提示 ===== */
+#toast{
+  position:fixed;left:50%;bottom:36px;transform:translateX(-50%) translateY(16px);background:var(--ink);color:#fff;
+  padding:10px 20px;border-radius:999px;font-size:13.5px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:99;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-mark" id="brandMark"></span>
+      <span class="brand-name">跳绳成绩登记簿</span>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="sidebar-foot">所有数据保存在本机浏览器中<br>换电脑或浏览器时请先导出备份</div>
+  </aside>
+  <main class="main" id="view"></main>
+</div>
+<div id="modalRoot"></div>
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js" integrity="sha384-pPi0zxBAoDu6+JXW/C68UZLvBUUtU+7zonhif43rqj7pxsGyqyqzcian2Rj37Rss" crossorigin="anonymous"></script>
+<script>
+/* ============================================================
+   跳绳成绩登记簿 —— 数据层
+   ============================================================ */
+const STORE_KEY='jumpRopeBook.v1';
+const PALETTE=['#3B6FB6','#2F9E63','#D99A2B','#8E5BC4','#E4572E'];
+const $=(s,el=document)=>el.querySelector(s);
+const $$=(s,el=document)=>Array.from(el.querySelectorAll(s));
+const esc=(v)=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>'id'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const todayStr=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+const fmtDate=(s)=>{const p=String(s).split('-');return p.length===3?p[1]+'-'+p[2]:s;};
+const round1=(n)=>Math.round(n*10)/10;
+const dateOffset=(n)=>{const d=new Date();d.setDate(d.getDate()+n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+
+function defaultState(){
+  return {classes:[],students:[],tests:[],records:[],settings:{passLine:60,excellentLine:100,unit:'次/分'}};
+}
+function migrate(d){
+  d.settings=Object.assign(defaultState().settings,d.settings||{});
+  d.classes.forEach(c=>{
+    const stus=d.students.filter(s=>s.classId===c.id);
+    let max=stus.reduce((m,s)=>Math.max(m,s.seq||0),0);
+    stus.forEach(s=>{if(s.seq==null){max++;s.seq=max;}});
+  });
+  return d;
+}
+function loadState(){
+  try{
+    const raw=localStorage.getItem(STORE_KEY);
+    if(raw){
+      const d=JSON.parse(raw);
+      if(d&&Array.isArray(d.classes)&&Array.isArray(d.students)&&Array.isArray(d.tests)&&Array.isArray(d.records)){
+        return migrate(d);
+      }
+    }
+  }catch(e){}
+  return defaultState();
+}
+let state=loadState();
+save(); /* 持久化迁移：为旧数据补齐学生序号 */
+function save(){localStorage.setItem(STORE_KEY,JSON.stringify(state));}
+
+function cls(id){return state.classes.find(c=>c.id===id);}
+function studentsOf(cid){
+  return state.students.filter(s=>s.classId===cid).sort((a,b)=>(a.seq||0)-(b.seq||0));
+}
+function nextSeq(cid){
+  return studentsOf(cid).reduce((m,s)=>Math.max(m,s.seq||0),0)+1;
+}
+function testsOf(cid){return state.tests.filter(t=>t.classId===cid).sort((a,b)=>a.date<b.date?-1:1);}
+function recOf(tid,sid){return state.records.find(r=>r.testId===tid&&r.studentId===sid);}
+function setCount(tid,sid,count){
+  let r=recOf(tid,sid);
+  if(count==null){
+    if(r){state.records=state.records.filter(x=>x!==r);}
+  }else{
+    if(r){r.count=count;}else{state.records.push({testId:tid,studentId:sid,count});}
+  }
+  save();
+}
+function testStats(tid){
+  const all=state.records.filter(r=>r.testId===tid);
+  const recs=all.filter(r=>r.count!=null);
+  const counts=recs.map(r=>r.count);
+  const n=counts.length;
+  const s=state.settings;
+  const sum=counts.reduce((a,b)=>a+b,0);
+  const pass=counts.filter(c=>c>=s.passLine).length;
+  const exc=counts.filter(c=>c>=s.excellentLine).length;
+  return {
+    participated:n,total:all.length,
+    avg:n?round1(sum/n):null,
+    max:n?Math.max.apply(null,counts):null,
+    min:n?Math.min.apply(null,counts):null,
+    pass,passRate:n?Math.round(pass/n*100):null,
+    exc,excRate:n?Math.round(exc/n*100):null
+  };
+}
+function badgeFor(v){
+  if(v==null||v==='')return '<span class="badge none">未参加</span>';
+  if(v>=state.settings.excellentLine)return '<span class="badge exc">优秀</span>';
+  if(v>=state.settings.passLine)return '<span class="badge ok">及格</span>';
+  return '<span class="badge fail">未达标</span>';
+}
+
+/* ============================================================
+   图标
+   ============================================================ */
+const IC={
+  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+  chart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg>',
+  gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h10"/><circle cx="17" cy="7" r="2.4"/><path d="M4 17h6"/><circle cx="13" cy="17" r="2.4"/><path d="M20 17h0"/></svg>',
+  db:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.5" rx="8" ry="2.8"/><path d="M4 5.5V12c0 1.5 3.6 2.8 8 2.8s8-1.3 8-2.8V5.5"/><path d="M4 12v6.5c0 1.5 3.6 2.8 8 2.8s8-1.3 8-2.8V12"/></svg>',
+  rope:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 19c5 0 5-14 9-14s4 9 2 10.5"/><path d="M19 5c-4 0-4 10-8 12"/><path d="M3 19l-1-1"/><path d="M22 6l-1 1"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  pencil:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4.5-1L20 7.5 16.5 4 5 15.5 4 20z"/><path d="M14.5 6l3.5 3.5"/></svg>',
+  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4.8A.8.8 0 0 1 9.8 4h4.4a.8.8 0 0 1 .8.8V7M6.5 7l1 13h9l1-13"/><path d="M10 11v6M14 11v6"/></svg>',
+  download:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M4 19h16"/></svg>',
+  upload:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="M7 9l5-5 5 5"/><path d="M4 19h16"/></svg>',
+  users:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="9" r="2.6"/><path d="M16.5 14c2.2.3 3.6 1.9 4 4.5"/></svg>',
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>'
+};
+$('#brandMark').innerHTML=IC.rope;
+$('#nav').innerHTML=
+  '<a class="nav-item" data-nav="home" href="#/">'+IC.home+'班级总览</a>'+
+  '<a class="nav-item" data-nav="settings" href="#/settings">'+IC.gear+'设置</a>'+
+  '<a class="nav-item" data-nav="data" href="#/data">'+IC.db+'数据管理</a>';
+
+/* ============================================================
+   路由与渲染
+   ============================================================ */
+function parseRoute(){
+  const h=location.hash||'#/';
+  const tm=h.match(/^#\/test\/([^/]+)/);
+  if(tm)return{name:'test',id:tm[1]};
+  const m=h.match(/^#\/class\/([^/]+)(?:\/(stats|students))?/);
+  if(m)return{name:'class',id:m[1],tab:m[2]||'entry'};
+  if(h.indexOf('#/settings')===0)return{name:'settings'};
+  if(h.indexOf('#/data')===0)return{name:'data'};
+  return{name:'home'};
+}
+const chartInstances={};
+function disposeCharts(){
+  Object.keys(chartInstances).forEach(k=>{try{chartInstances[k].dispose();}catch(e){}delete chartInstances[k];});
+}
+function renderChart(id,opt){
+  const el=document.getElementById(id);
+  if(!el)return;
+  let inst=chartInstances[id];
+  if(!inst){
+    inst=echarts.init(el);
+    chartInstances[id]=inst;
+    new ResizeObserver(()=>inst.resize()).observe(el);
+  }
+  inst.setOption(opt,true);
+}
+function render(){
+  disposeCharts();
+  const route=parseRoute();
+  $$('.nav-item').forEach(a=>a.classList.toggle('active',a.dataset.nav===route.name||((route.name==='class'||route.name==='test')&&a.dataset.nav==='home')));
+  const view=$('#view');
+  if(route.name==='home')view.innerHTML=viewHome();
+  else if(route.name==='settings')view.innerHTML=viewSettings();
+  else if(route.name==='data')view.innerHTML=viewData();
+  else if(route.name==='class'){
+    const c=cls(route.id);
+    if(!c){location.hash='#/';return;}
+    view.innerHTML=viewClass(c,route.tab);
+    if(route.tab==='stats')renderStatsCharts(c.id);
+  }
+  else if(route.name==='test'){
+    const t=state.tests.find(x=>x.id===route.id);
+    if(!t){location.hash='#/';return;}
+    view.innerHTML=viewTest(t);
+    const first=$('#view .count-input');
+    if(first)first.focus();
+  }
+  window.scrollTo(0,0);
+}
+window.addEventListener('hashchange',render);
+
+/* ============================================================
+   提示与模态
+   ============================================================ */
+let toastTimer=null;
+function toast(msg){
+  let el=$('#toast');
+  el.textContent=msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),2200);
+}
+function openModal(html,wide){
+  $('#modalRoot').innerHTML='<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal'+(wide?' wide':'')+'">'+html+'</div></div>';
+}
+function closeModal(){$('#modalRoot').innerHTML='';}
+
+/* ============================================================
+   视图：班级总览
+   ============================================================ */
+function viewHome(){
+  const nClass=state.classes.length;
+  const nStudent=state.students.length;
+  const nTest=state.tests.length;
+  const nRec=state.records.length;
+  const html=`
+  <header class="page-head">
+    <div>
+      <h1>班级总览</h1>
+      <div class="sub">记录每个班级每次跳绳测试的日期与成绩，自动统计平均、最高与及格情况</div>
+    </div>
+    <div class="head-actions">
+      <button class="btn primary" onclick="openNewClass()">${IC.plus}新建班级</button>
+    </div>
+  </header>
+  <div class="stat-row">
+    <div class="stat-card"><div class="tick-strip"></div><div class="k">班级数</div><div class="v">${nClass}</div><div class="d">已登记的班级</div></div>
+    <div class="stat-card"><div class="tick-strip"></div><div class="k">学生总数</div><div class="v">${nStudent}</div><div class="d">全部班级学生</div></div>
+    <div class="stat-card"><div class="tick-strip"></div><div class="k">测试次数</div><div class="v">${nTest}</div><div class="d">累计组织的跳绳测试</div></div>
+    <div class="stat-card"><div class="tick-strip"></div><div class="k">成绩记录</div><div class="v">${nRec}</div><div class="d">累计录入的成绩条数</div></div>
+  </div>`;
+  if(!nClass){
+    return html+`
+    <div class="empty-state">
+      <h3>还没有班级</h3>
+      <p>先创建一个班级，再为班级添加学生、按测试日期录入跳绳成绩，即可自动生成统计与趋势图。</p>
+      <div class="row">
+        <button class="btn primary" onclick="openNewClass()">${IC.plus}新建班级</button>
+        <button class="btn" onclick="loadSample()">载入示例数据（可删除）</button>
+      </div>
+    </div>`;
+  }
+  const cards=state.classes.map(c=>{
+    const stus=studentsOf(c.id);
+    const tests=testsOf(c.id);
+    const last=tests.length?testStats(tests[tests.length-1].id):null;
+    return `
+    <a class="class-card" href="#/class/${c.id}">
+      <div class="tick-strip"></div>
+      <div class="class-card-body">
+        <h3>${esc(c.name)}</h3>
+        <div class="class-meta">学生 ${stus.length} 人 · 测试 ${tests.length} 次</div>
+        <div class="class-nums">
+          <span>最近平均<b class="num">${last&&last.avg!=null?last.avg:'—'}</b></span>
+          <span>及格率<b class="num">${last&&last.passRate!=null?last.passRate+'%':'—'}</b></span>
+          <span>最高<b class="num">${last&&last.max!=null?last.max:'—'}</b></span>
+        </div>
+      </div>
+    </a>`;
+  }).join('');
+  return html+`<div class="class-grid">${cards}</div>`;
+}
+
+/* ============================================================
+   视图：班级工作台
+   ============================================================ */
+function viewClass(c,tab){
+  const tabs=[
+    ['entry','成绩录入','#/class/'+c.id],
+    ['stats','统计分析','#/class/'+c.id+'/stats'],
+    ['students','学生名单','#/class/'+c.id+'/students']
+  ].map(t=>'<a class="tab'+(tab===t[0]?' active':'')+'" href="'+t[2]+'">'+t[1]+'</a>').join('');
+  let body='';
+  if(tab==='stats')body=viewStats(c);
+  else if(tab==='students')body=viewStudents(c);
+  else body=viewEntry(c);
+  return `
+  <a class="back-link" href="#/">${IC.back}返回总览</a>
+  <header class="page-head">
+    <div>
+      <h1>${esc(c.name)}</h1>
+      <div class="sub">${studentsOf(c.id).length} 名学生 · ${testsOf(c.id).length} 次测试</div>
+    </div>
+    <div class="head-actions">
+      <button class="btn" onclick="openRenameClass('${c.id}')">${IC.pencil}重命名</button>
+      <button class="btn danger" onclick="delClass('${c.id}')">${IC.trash}删除班级</button>
+    </div>
+  </header>
+  <div class="tab-bar">${tabs}</div>
+  ${body}`;
+}
+
+/* ---------- 成绩录入 ---------- */
+function viewEntry(c){
+  const tests=testsOf(c.id).slice().reverse();
+  const unit=state.settings.unit;
+  const cards=tests.map(t=>{
+    const st=testStats(t.id);
+    const s=cls(t.classId);
+    const chips=[
+      ['参加',(st.participated)+'/'+studentsOf(c.id).length],
+      ['平均',st.avg!=null?st.avg:'—'],
+      ['最高',st.max!=null?st.max:'—'],
+      ['及格率',st.passRate!=null?st.passRate+'%':'—'],
+      ['优秀率',st.excRate!=null?st.excRate+'%':'—']
+    ].map(x=>'<span class="chip">'+x[0]+' <b>'+esc(x[1])+'</b></span>').join('');
+    return `
+    <div class="test-card">
+      <div class="tick-strip"></div>
+      <div class="test-card-main">
+        <div class="test-date"><span class="date-big num">${fmtDate(t.date)}</span><span class="date-year">${esc(t.date)}</span></div>
+        <div class="test-info">
+          <h3>${esc(t.name||'第 '+(testsOf(c.id).indexOf(t)+1)+' 次测试')}</h3>
+          <div class="chips">${chips}</div>
+        </div>
+        <div class="test-actions">
+          <a class="btn primary sm" href="#/test/${t.id}">${IC.pencil}录入成绩</a>
+          <button class="btn sm" onclick="exportTestCsv('${t.id}')">${IC.download}导出成绩</button>
+          <button class="btn sm danger" onclick="delTest('${t.id}')">${IC.trash}删除数据</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  return `
+  <div class="entry-top">
+    <button class="btn primary" onclick="openNewTest('${c.id}')">${IC.plus}新建测试</button>
+    <span class="hint">每次测试填写日期，并为每位学生录入 ${esc(unit)} 成绩；未参加的学生留空即可</span>
+  </div>
+  ${tests.length?`<div class="test-list">${cards}</div>`:`
+  <div class="empty-state">
+    <h3>还没有测试记录</h3>
+    <p>点击「新建测试」选择日期，然后为每位学生录入本次跳绳次数，系统会自动统计平均、最高与及格率。</p>
+    <div class="row"><button class="btn primary" onclick="openNewTest('${c.id}')">${IC.plus}新建测试</button></div>
+  </div>`}`;
+}
+
+/* ---------- 学生名单 ---------- */
+function viewStudents(c){
+  const stus=studentsOf(c.id);
+  const rows=stus.map(s=>{
+    const tests=testsOf(c.id);
+    let participated=0,best=null,sum=0;
+    for(const t of tests){
+      const r=recOf(t.id,s.id);
+      if(r&&r.count!=null){participated++;sum+=r.count;if(best==null||r.count>best)best=r.count;}
+    }
+    const avg=participated?round1(sum/participated):null;
+    return `<tr>
+      <td class="num">${s.seq}</td>
+      <td>${esc(s.name)}</td>
+      <td>${esc(s.gender)||'—'}</td>
+      <td class="num">${participated}</td>
+      <td class="num">${best!=null?best:'—'}</td>
+      <td class="num">${avg!=null?avg:'—'}</td>
+      <td class="ops"><button class="btn sm" onclick="openEditStudent('${s.id}')">编辑</button><button class="btn sm danger" onclick="delStudent('${s.id}')">删除</button></td>
+    </tr>`;
+  }).join('');
+  return `
+  <div class="add-student-row">
+    <div class="field grow"><span>姓名</span><input id="stuName" type="text" maxlength="12" placeholder="学生姓名" onkeydown="if(event.key==='Enter')addStudent('${c.id}')"></div>
+    <div class="field"><span>性别</span><select id="stuGender"><option value="">未填</option><option>男</option><option>女</option></select></div>
+    <button class="btn primary" onclick="addStudent('${c.id}')">${IC.plus}添加学生</button>
+    <button class="btn" onclick="openBulkAdd('${c.id}')">批量添加</button>
+  </div>
+  <div class="table-wrap">
+    <table class="tbl">
+      <thead><tr><th style="width:60px">序号</th><th>姓名</th><th>性别</th><th>参加测试</th><th>最好成绩</th><th>平均成绩</th><th>操作</th></tr></thead>
+      <tbody>${rows||'<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:28px">还没有学生，请在上方添加（支持批量添加：每行「序号,姓名,性别」）</td></tr>'}</tbody>
+    </table>
+  </div>`;
+}
+
+/* ============================================================
+   视图：统计分析
+   ============================================================ */
+let compareSel=[];
+function viewStats(c){
+  const tests=testsOf(c.id);
+  const stus=studentsOf(c.id);
+  const last=tests.length?testStats(tests[tests.length-1].id):null;
+  if(compareSel.length===0&&stus.length)compareSel=stus.slice(0,3).map(s=>s.id);
+  const s=state.settings;
+  const card=(k,v,d)=>'<div class="stat-card"><div class="tick-strip"></div><div class="k">'+k+'</div><div class="v">'+v+'</div><div class="d">'+d+'</div></div>';
+  const statRow=`
+  <div class="stat-row">
+    ${card('测试次数',tests.length,'共 '+tests.length+' 次')}
+    ${card('最近平均',last&&last.avg!=null?'<small class="num">'+last.avg+'</small>':'—','<small>'+esc(s.unit)+'</small>')}
+    ${card('最近最高',last&&last.max!=null?'<small class="num">'+last.max+'</small>':'—','')}
+    ${card('最近及格率',last&&last.passRate!=null?'<small class="num">'+last.passRate+'%</small>':'—','及格线 '+s.passLine+' '+esc(s.unit))}
+  </div>`;
+  if(!tests.length){
+    return statRow+`
+    <div class="empty-state">
+      <h3>暂无统计数据</h3>
+      <p>新建至少一次测试并录入成绩后，这里会展示平均成绩趋势、及格率变化、成绩分布与个人对比。</p>
+    </div>`;
+  }
+  const chips=stus.map(x=>'<button class="stu-chip'+(compareSel.includes(x.id)?' on':'')+'" onclick="toggleCompare(\''+c.id+'\',\''+x.id+'\')">'+esc(x.name)+'</button>').join('');
+  return statRow+`
+  <div class="chart-grid">
+    <div class="chart-card full">
+      <div class="chart-head"><h3>各次测试平均成绩趋势</h3><span class="chart-sub">虚线为及格线 ${s.passLine} ${esc(s.unit)}</span></div>
+      <div id="chAvg" class="chart"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head"><h3>各次测试及格率</h3><span class="chart-sub">按及格线 ${s.passLine} ${esc(s.unit)}</span></div>
+      <div id="chPass" class="chart"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head"><h3>最近一次成绩分布</h3><span class="chart-sub">${esc(tests[tests.length-1].date)}</span></div>
+      <div id="chDist" class="chart"></div>
+    </div>
+    <div class="chart-card full">
+      <div class="chart-head"><h3>学生个人成绩对比</h3><span class="chart-sub">点击下方学生添加或移除，最多 5 人</span></div>
+      <div class="stu-picker">${chips||'<span class="hint">该班级暂无学生</span>'}</div>
+      <div id="chStu" class="chart"></div>
+    </div>
+  </div>`;
+}
+function renderStatsCharts(cid){
+  const tests=testsOf(cid);
+  if(!tests.length)return;
+  renderChart('chAvg',optAvgTrend(cid));
+  renderChart('chPass',optPassRate(cid));
+  renderChart('chDist',optDist(cid));
+  if(studentsOf(cid).length)renderChart('chStu',optStudents(cid));
+}
+function axisStyle(rotate){
+  return {axisTick:{show:false},axisLine:{lineStyle:{color:'#D8D0BD'}},axisLabel:{color:'#8A8F98',rotate:rotate,interval:0},nameTextStyle:{color:'#8A8F98'}};
+}
+function optAvgTrend(cid){
+  const tests=testsOf(cid);
+  const labels=tests.map(t=>fmtDate(t.date));
+  const data=tests.map(t=>testStats(t.id).avg);
+  const rotate=labels.length>6?30:0;
+  return {
+    tooltip:{trigger:'axis',confine:true,valueFormatter:v=>v!=null?v+' '+state.settings.unit:'—'},
+    grid:{left:8,right:16,top:30,bottom:rotate?48:30,containLabel:true},
+    xAxis:Object.assign({type:'category',data:labels,boundaryGap:false},axisStyle(rotate)),
+    yAxis:{type:'value',name:state.settings.unit,splitLine:{lineStyle:{color:'#EFE9DC'}},...axisStyle(0)},
+    series:[{
+      name:'平均成绩',type:'line',smooth:true,symbol:'circle',symbolSize:7,
+      data,lineStyle:{width:3,color:'#E4572E'},itemStyle:{color:'#E4572E'},
+      markLine:{silent:true,symbol:'none',data:[{yAxis:state.settings.passLine}],lineStyle:{color:'#D64545',type:'dashed',width:1.5},label:{formatter:()=> '及格线 '+state.settings.passLine,color:'#D64545',position:'insideEndTop'}}
+    }]
+  };
+}
+function optPassRate(cid){
+  const tests=testsOf(cid);
+  const labels=tests.map(t=>fmtDate(t.date));
+  const data=tests.map(t=>testStats(t.id).passRate);
+  const rotate=labels.length>6?30:0;
+  return {
+    tooltip:{trigger:'axis',confine:true,valueFormatter:v=>v!=null?v+'%':'—'},
+    grid:{left:8,right:16,top:30,bottom:rotate?48:30,containLabel:true},
+    xAxis:Object.assign({type:'category',data:labels,boundaryGap:true},axisStyle(rotate)),
+    yAxis:{type:'value',name:'%',max:100,splitLine:{lineStyle:{color:'#EFE9DC'}},...axisStyle(0)},
+    series:[{name:'及格率',type:'bar',data,barWidth:'38%',itemStyle:{color:'#2F9E63',borderRadius:[4,4,0,0]},label:{show:true,position:'top',formatter:p=>p.value+'%'}}]
+  };
+}
+function optDist(cid){
+  const tests=testsOf(cid);
+  const st=testStats(tests[tests.length-1].id);
+  const s=state.settings;
+  const data=[
+    {name:'未达标',value:Math.max(0,st.participated-st.pass),color:'#D64545'},
+    {name:'及格',value:st.pass-st.exc,color:'#D99A2B'},
+    {name:'优秀',value:st.exc,color:'#2F9E63'}
+  ];
+  return {
+    tooltip:{trigger:'axis',confine:true},
+    grid:{left:8,right:16,top:30,bottom:30,containLabel:true},
+    xAxis:Object.assign({type:'category',data:data.map(d=>d.name),boundaryGap:true},axisStyle(0)),
+    yAxis:{type:'value',name:'人数',minInterval:1,splitLine:{lineStyle:{color:'#EFE9DC'}},...axisStyle(0)},
+    series:[{
+      name:'人数',type:'bar',data:data.map(d=>d.value),barWidth:'46%',
+      itemStyle:{color:p=>data[p.dataIndex].color,borderRadius:[4,4,0,0]},
+      label:{show:true,position:'top',formatter:p=>p.value+' 人'}
+    }]
+  };
+}
+function optStudents(cid){
+  const tests=testsOf(cid);
+  const stus=studentsOf(cid).filter(x=>compareSel.includes(x.id));
+  const labels=tests.map(t=>fmtDate(t.date));
+  const series=stus.map((s,i)=>({
+    name:s.name,type:'line',smooth:true,symbol:'circle',symbolSize:6,
+    data:tests.map(t=>{const r=recOf(t.id,s.id);return r&&r.count!=null?r.count:null;}),
+    lineStyle:{width:2.5,color:PALETTE[i%PALETTE.length]},
+    itemStyle:{color:PALETTE[i%PALETTE.length]}
+  }));
+  const rotate=labels.length>6?30:0;
+  return {
+    tooltip:{trigger:'axis',confine:true,valueFormatter:v=>v!=null?v+' '+state.settings.unit:'未参加'},
+    legend:{type:'scroll',bottom:0,textStyle:{color:'#4B5563'}},
+    grid:{left:8,right:16,top:30,bottom:rotate?64:44,containLabel:true},
+    xAxis:Object.assign({type:'category',data:labels,boundaryGap:false},axisStyle(rotate)),
+    yAxis:{type:'value',name:state.settings.unit,splitLine:{lineStyle:{color:'#EFE9DC'}},...axisStyle(0)},
+    series:series
+  };
+}
+function toggleCompare(cid,sid){
+  if(compareSel.includes(sid))compareSel=compareSel.filter(x=>x!==sid);
+  else{
+    if(compareSel.length>=5){toast('最多同时对比 5 名学生');return;}
+    compareSel.push(sid);
+  }
+  render();
+}
+
+/* ============================================================
+   视图：设置
+   ============================================================ */
+function viewSettings(){
+  const s=state.settings;
+  return `
+  <header class="page-head"><div><h1>设置</h1><div class="sub">成绩及格与优秀的判定标准，修改后立即作用于全部统计</div></div></header>
+  <div class="panel">
+    <h3>成绩标准</h3>
+    <div class="p-sub">请按本校体育测试标准填写（默认按一分钟跳绳常用标准）</div>
+    <div class="panel-row">
+      <div class="field"><span>及格线（次）</span><input class="num-input" id="setPass" type="number" min="0" step="1" value="${s.passLine}"></div>
+      <div class="field"><span>优秀线（次）</span><input class="num-input" id="setExc" type="number" min="0" step="1" value="${s.excellentLine}"></div>
+      <div class="field"><span>成绩单位</span><input class="num-input" id="setUnit" type="text" maxlength="10" value="${esc(s.unit)}"></div>
+    </div>
+    <div style="margin-top:6px"><button class="btn primary" onclick="saveSettings()">保存设置</button></div>
+  </div>`;
+}
+function saveSettings(){
+  const p=Number($('#setPass').value),e=Number($('#setExc').value),u=$('#setUnit').value.trim();
+  if(!Number.isFinite(p)||p<0||!Number.isFinite(e)||e<0){toast('及格线与优秀线必须是不小于 0 的数字');return;}
+  if(!u){toast('请填写成绩单位');return;}
+  state.settings.passLine=Math.round(p);
+  state.settings.excellentLine=Math.round(e);
+  state.settings.unit=u;
+  save();toast('设置已保存');render();
+}
+
+/* ============================================================
+   视图：数据管理
+   ============================================================ */
+function viewData(){
+  const classOpts=state.classes.map(c=>'<option value="'+c.id+'">'+esc(c.name)+'</option>').join('');
+  return `
+  <header class="page-head"><div><h1>数据管理</h1><div class="sub">备份、恢复与导出成绩表</div></div></header>
+  <div class="panel">
+    <h3>备份与恢复</h3>
+    <div class="p-sub">所有数据保存在本机浏览器，换电脑、清理浏览器前请先导出备份</div>
+    <div class="data-actions">
+      <div class="row"><button class="btn primary" onclick="exportJson()">${IC.download}导出全部数据（JSON 备份）</button><span class="desc">包含班级、学生、测试与全部成绩</span></div>
+      <div class="row">
+        <button class="btn" onclick="$('#importFile').click()">${IC.upload}导入备份</button>
+        <input id="importFile" type="file" accept=".json,application/json" style="display:none" onchange="importJson(this)">
+        <span class="desc">选择之前导出的 JSON 备份文件（将覆盖当前数据）</span>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>导出成绩总表</h3>
+    <div class="p-sub">按班级导出 CSV 成绩总表（每位学生一行，每次测试一列），可直接用 Excel 打开</div>
+    <div class="data-actions">
+      <div class="row">
+        <select id="exportClass" style="width:200px;border:1px solid var(--line-strong);border-radius:9px;padding:8px 12px;background:var(--surface)"><option value="">请选择班级</option>${classOpts}</select>
+        <button class="btn" onclick="exportClassCsv()">${IC.download}导出该班成绩总表</button>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>危险操作</h3>
+    <div class="p-sub">清空后不可恢复，操作前请确认已导出备份</div>
+    <button class="btn danger" onclick="clearAll()">${IC.trash}清空全部数据</button>
+  </div>`;
+}
+
+/* ============================================================
+   班级操作
+   ============================================================ */
+function openNewClass(){
+  openModal(`
+    <div class="modal-head"><h3>新建班级</h3><button class="icon-btn" onclick="closeModal()">${IC.x}</button></div>
+    <div class="modal-body">
+      <div class="field"><span>班级名称</span><input id="newClassName" type="text" maxlength="20" placeholder="如：三（1）班" onkeydown="if(event.key==='Enter')createClass()"></div>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal()">取消</button><button class="btn primary" onclick="createClass()">创建班级</button></div>`);
+  $('#newClassName').focus();
+}
+function createClass(){
+  const name=$('#newClassName').value.trim();
+  if(!name){toast('请输入班级名称');return;}
+  state.classes.push({id:uid(),name});
+  save();closeModal();render();toast('已创建「'+name+'」');
+}
+function openRenameClass(cid){
+  const c=cls(cid);
+  openModal(`
+    <div class="modal-head"><h3>重命名班级</h3><button class="icon-btn" onclick="closeModal()">${IC.x}</button></div>
+    <div class="modal-body">
+      <div class="field"><span>班级名称</span><input id="renameInput" type="text" maxlength="20" value="${esc(c.name)}" onkeydown="if(event.key==='Enter')renameClass('${cid}')"></div>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal()">取消</button><button class="btn primary" onclick="renameClass('${cid}')">保存</button></div>`);
+  $('#renameInput').focus();
+}
+function renameClass(cid){
+  const name=$('#renameInput').value.trim();
+  if(!name){toast('请输入班级名称');return;}
+  cls(cid).name=name;save();closeModal();render();toast('班级已重命名');
+}
+function delClass(cid){
+  const c=cls(cid);
+  if(!confirm('删除班级「'+c.name+'」将同时删除该班全部学生、测试与成绩记录，确定删除？'))return;
+  state.classes=state.classes.filter(x=>x.id!==cid);
+  const sids=studentsOf(cid).map(s=>s.id);
+  state.students=state.students.filter(s=>s.classId!==cid);
+  const tids=state.tests.filter(t=>t.classId===cid).map(t=>t.id);
+  state.tests=state.tests.filter(t=>t.classId!==cid);
+  state.records=state.records.filter(r=>!tids.includes(r.testId));
+  save();
+  if(parseRoute().name==='class')location.hash='#/';
+  else render();
+  toast('班级已删除');
+}
+
+/* ============================================================
+   测试操作
+   ============================================================ */
+function openNewTest(cid){
+  openModal(`
+    <div class="modal-head"><h3>新建测试</h3><button class="icon-btn" onclick="closeModal()">${IC.x}</button></div>
+    <div class="modal-body">
+      <div class="field"><span>测试日期</span><input id="ntDate" type="date" value="${todayStr()}"></div>
+      <div class="field"><span>测试名称（可选）</span><input id="ntName" type="text" maxlength="30" placeholder="如：第 3 次测试 / 期中测试" onkeydown="if(event.key==='Enter')createTest('${cid}')"></div>
+      <div class="hint">创建后即可为每位学生录入本次跳绳成绩，未参加的学生留空。</div>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal()">取消</button><button class="btn primary" onclick="createTest('${cid}')">创建并录入成绩</button></div>`);
+  $('#ntDate').focus();
+}
+function createTest(cid){
+  const date=$('#ntDate').value;
+  const name=$('#ntName').value.trim();
+  if(!date){toast('请选择测试日期');return;}
+  const tid=uid();
+  state.tests.push({id:tid,classId:cid,date:date,name:name});
+  save();closeModal();
+  location.hash='#/test/'+tid;
+  toast('测试已创建，可直接录入或修改成绩');
+}
+function delTest(tid){
+  const t=state.tests.find(x=>x.id===tid);
+  if(!confirm('删除本次测试将同时删除该次全部成绩记录，确定删除？'))return;
+  state.tests=state.tests.filter(x=>x.id!==tid);
+  state.records=state.records.filter(r=>r.testId!==tid);
+  save();closeModal();
+  const route=parseRoute();
+  if(route.name==='test'&&route.id===tid)location.hash='#/class/'+(t?t.classId:'');
+  else render();
+  toast('测试已删除');
+}
+
+/* ---------- 测试详情页（可随时改日期、名称与成绩） ---------- */
+function viewTest(t){
+  const c=cls(t.classId);
+  const stus=studentsOf(c.id);
+  const s=state.settings;
+  let body;
+  if(!stus.length){
+    body=`
+    <div class="empty-state">
+      <h3>该班级还没有学生</h3>
+      <p>先到学生名单添加学生，再回到本页录入本次成绩。</p>
+      <div class="row"><a class="btn primary" href="#/class/${c.id}/students">${IC.users}去添加学生</a></div>
+    </div>`;
+  }else{
+    const rows=stus.map(st=>{
+      const r=recOf(t.id,st.id);
+      const v=r&&r.count!=null?r.count:'';
+      return `<tr>
+        <td class="num">${st.seq}</td>
+        <td>${esc(st.name)}</td>
+        <td>${esc(st.gender)||'—'}</td>
+        <td><input class="count-input${v===''?' empty':''}" id="inp-${st.id}" type="number" min="0" step="1" inputmode="numeric" value="${v}" placeholder="留空=未参加" oninput="saveCount('${t.id}','${st.id}',this)"></td>
+        <td><span id="badge-${st.id}">${badgeFor(v===''?null:Number(v))}</span></td>
+      </tr>`;
+    }).join('');
+    body=`
+    <div class="entry-summary" id="entrySummary" style="margin:0 0 14px">${entrySummaryHtml(t.id)}</div>
+    <div class="table-wrap">
+      <table class="tbl">
+        <thead><tr><th style="width:56px">序号</th><th>姓名</th><th style="width:64px">性别</th><th style="width:140px">成绩（${esc(s.unit)}）</th><th style="width:96px">状态</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  }
+  return `
+  <a class="back-link" href="#/class/${c.id}">${IC.back}返回班级「${esc(c.name)}」</a>
+  <header class="page-head">
+    <div><h1>测试成绩</h1><div class="sub">${esc(c.name)} · 日期、名称与成绩修改后自动保存</div></div>
+    <div class="head-actions">
+      <button class="btn" onclick="exportTestCsv('${t.id}')">${IC.download}导出成绩</button>
+      <button class="btn danger" onclick="delTest('${t.id}')">${IC.trash}删除测试</button>
+    </div>
+  </header>
+  <div class="panel" style="margin-bottom:18px">
+    <div class="panel-row" style="align-items:flex-end">
+      <div class="field" style="margin-bottom:0"><span>测试日期</span><input type="date" value="${t.date}" onchange="setTestDate('${t.id}',this)"></div>
+      <div class="field" style="margin-bottom:0;flex:1;min-width:240px"><span>测试名称（可选）</span><input type="text" maxlength="30" value="${esc(t.name||'')}" placeholder="如：第 3 次测试 / 期中测试" onchange="setTestName('${t.id}',this)"></div>
+      <button class="btn danger" onclick="clearTestCounts('${t.id}')">清空本次成绩</button>
+    </div>
+  </div>
+  ${body}`;
+}
+function setTestDate(tid,input){
+  const t=state.tests.find(x=>x.id===tid);
+  if(!input.value){toast('请选择日期');input.value=t.date;return;}
+  t.date=input.value;save();toast('测试日期已更新');
+}
+function setTestName(tid,input){
+  const t=state.tests.find(x=>x.id===tid);
+  t.name=input.value.trim();save();toast('测试名称已更新');
+}
+function entrySummaryHtml(tid){
+  const st=testStats(tid);
+  const s=state.settings;
+  const chips=[
+    ['已录入',st.participated+' / '+st.total+' 人'],
+    ['平均',st.avg!=null?st.avg:'—'],
+    ['最高',st.max!=null?st.max:'—'],
+    ['及格率',st.passRate!=null?st.passRate+'%':'—'],
+    ['优秀率',st.excRate!=null?st.excRate+'%':'—']
+  ].map(x=>'<span class="chip">'+x[0]+' <b class="num">'+esc(x[1])+'</b></span>').join('');
+  return '<span class="hint">及格线 '+s.passLine+' · 优秀线 '+s.excellentLine+'（'+esc(s.unit)+'）</span>'+chips;
+}
+function saveCount(tid,sid,input){
+  const raw=input.value.trim();
+  let count=null;
+  if(raw!==''){
+    const v=Number(raw);
+    if(Number.isFinite(v)&&v>=0){count=Math.round(v);input.value=count;}
+    else{input.value='';}
+  }
+  input.classList.toggle('empty',input.value==='');
+  setCount(tid,sid,count);
+  const badge=$('#badge-'+sid);
+  if(badge)badge.innerHTML=badgeFor(count);
+  const sum=$('#entrySummary');
+  if(sum)sum.innerHTML=entrySummaryHtml(tid);
+}
+function clearTestCounts(tid){
+  if(!confirm('确定清空本次测试的全部成绩？'))return;
+  state.records=state.records.filter(r=>r.testId!==tid);
+  save();
+  render();
+  toast('本次成绩已清空');
+}
+
+/* ============================================================
+   学生操作
+   ============================================================ */
+function addStudent(cid){
+  const name=$('#stuName').value.trim();
+  const gender=$('#stuGender').value;
+  if(!name){toast('请输入学生姓名');return;}
+  if(studentsOf(cid).some(s=>s.name===name)){toast('该班级已有同名学生');return;}
+  state.students.push({id:uid(),classId:cid,seq:nextSeq(cid),name:name,gender:gender});
+  save();render();
+  $('#stuName').value='';
+  $('#stuName').focus();
+  toast('已添加「'+name+'」');
+}
+function openBulkAdd(cid){
+  openModal(`
+    <div class="modal-head"><h3>批量添加学生</h3><button class="icon-btn" onclick="closeModal()">${IC.x}</button></div>
+    <div class="modal-body">
+      <div class="field"><span>学生名单</span>
+        <textarea id="bulkText" rows="10" placeholder="每行一名学生，格式：序号,姓名,性别&#10;1,张三,男&#10;2,李四,女&#10;3,王五,男"></textarea>
+      </div>
+      <div class="hint">每行一名学生，格式「序号,姓名,性别」，序号与姓名之间用英文逗号、中文逗号或 Tab 分隔（可直接从 Excel 粘贴）。也可省略序号（自动编号）或省略性别。添加后按序号从小到大排序，已存在的同名学生会自动跳过。</div>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal()">取消</button><button class="btn primary" onclick="bulkAdd('${cid}')">添加</button></div>`);
+  $('#bulkText').focus();
+}
+function parseBulkLine(line){
+  const parts=line.split(/[,，\t]+/).map(s=>s.trim()).filter(Boolean);
+  if(!parts.length)return null;
+  const isNum=/^\d+$/.test(parts[0]);
+  if(parts.length>=2&&isNum){
+    const gender=parts[2]==='女'?'女':(parts[2]==='男'?'男':'');
+    return {seq:parseInt(parts[0],10),name:parts[1],gender:gender};
+  }
+  const gender=parts[1]==='女'?'女':(parts[1]==='男'?'男':'');
+  return {seq:null,name:parts[0],gender:gender};
+}
+function bulkAdd(cid){
+  const lines=$('#bulkText').value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  const exist=studentsOf(cid).map(s=>s.name);
+  let added=0,skipped=0,next=nextSeq(cid);
+  const newStus=[];
+  for(const line of lines){
+    const p=parseBulkLine(line);
+    if(!p||!p.name)continue;
+    if(exist.includes(p.name)){skipped++;continue;}
+    const seq=(p.seq!=null&&p.seq>0)?p.seq:next;
+    newStus.push({id:uid(),classId:cid,seq:seq,name:p.name,gender:p.gender});
+    exist.push(p.name);added++;
+    next=Math.max(next,seq)+1;
+  }
+  state.students.push(...newStus);
+  save();closeModal();render();
+  toast('已添加 '+added+' 名学生，按序号排序'+(skipped?'，跳过重复 '+skipped+' 名':''));
+}
+function openEditStudent(sid){
+  const s=state.students.find(x=>x.id===sid);
+  openModal(`
+    <div class="modal-head"><h3>编辑学生</h3><button class="icon-btn" onclick="closeModal()">${IC.x}</button></div>
+    <div class="modal-body">
+      <div class="field"><span>姓名</span><input id="esName" type="text" maxlength="12" value="${esc(s.name)}" onkeydown="if(event.key==='Enter')saveEditStudent('${sid}')"></div>
+      <div class="field"><span>性别</span><select id="esGender"><option value="">未填</option><option${s.gender==='男'?' selected':''}>男</option><option${s.gender==='女'?' selected':''}>女</option></select></div>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal()">取消</button><button class="btn primary" onclick="saveEditStudent('${sid}')">保存</button></div>`);
+  $('#esName').focus();
+}
+function saveEditStudent(sid){
+  const s=state.students.find(x=>x.id===sid);
+  const name=$('#esName').value.trim();
+  if(!name){toast('请输入姓名');return;}
+  s.name=name;s.gender=$('#esGender').value;
+  save();closeModal();render();toast('学生信息已更新');
+}
+function delStudent(sid){
+  const s=state.students.find(x=>x.id===sid);
+  if(!confirm('删除学生「'+s.name+'」将同时删除其全部成绩记录，确定删除？'))return;
+  state.students=state.students.filter(x=>x.id!==sid);
+  state.records=state.records.filter(r=>r.studentId!==sid);
+  save();render();toast('学生已删除');
+}
+
+/* ============================================================
+   导出 / 导入
+   ============================================================ */
+function download(name,content){
+  const blob=new Blob(['\uFEFF'+content],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=name;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},100);
+}
+function csvCell(v){
+  v=String(v==null?'':v);
+  return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;
+}
+function exportJson(){
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='跳绳成绩备份-'+todayStr()+'.json';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},100);
+  toast('备份已导出');
+}
+function importJson(input){
+  const file=input.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const d=JSON.parse(reader.result);
+      if(!d||!Array.isArray(d.classes)||!Array.isArray(d.students)||!Array.isArray(d.tests)||!Array.isArray(d.records)){
+        throw new Error('格式不正确');
+      }
+      state=migrate(d);
+      save();render();toast('数据导入成功');
+    }catch(e){
+      toast('导入失败：文件不是有效的跳绳成绩备份');
+    }
+    input.value='';
+  };
+  reader.readAsText(file,'utf-8');
+}
+function exportTestCsv(tid){
+  const t=state.tests.find(x=>x.id===tid);
+  const c=cls(t.classId);
+  const stus=studentsOf(c.id);
+  const unit=state.settings.unit;
+  const head=['班级','测试日期','测试名称','姓名','性别','成绩('+unit+')','是否达标'];
+  const rows=stus.map(s=>{
+    const r=recOf(tid,s.id);
+    const v=r&&r.count!=null?r.count:'';
+    let flag='';
+    if(v!=='')flag=v>=state.settings.excellentLine?'优秀':(v>=state.settings.passLine?'及格':'未达标');
+    return [c.name,t.date,t.name||'',s.name,s.gender||'',v,flag].map(csvCell).join(',');
+  });
+  download('跳绳成绩-'+c.name+'-'+t.date+'.csv',[head.map(csvCell).join(','),...rows].join('\r\n'));
+  toast('CSV 已导出');
+}
+function exportClassCsv(){
+  const cid=$('#exportClass').value;
+  if(!cid){toast('请先选择班级');return;}
+  const c=cls(cid);
+  const stus=studentsOf(cid);
+  const tests=testsOf(cid);
+  const unit=state.settings.unit;
+  const head=['姓名','性别',...tests.map(t=>(t.name||fmtDate(t.date))+'('+t.date+')'),'平均','最好','及格次数'];
+  const rows=stus.map(s=>{
+    const vals=tests.map(t=>{const r=recOf(t.id,s.id);return r&&r.count!=null?r.count:'';});
+    const nums=vals.filter(v=>v!=='').map(Number);
+    const avg=nums.length?round1(nums.reduce((a,b)=>a+b,0)/nums.length):'';
+    const best=nums.length?Math.max.apply(null,nums):'';
+    const pass=nums.filter(v=>v>=state.settings.passLine).length;
+    return [s.name,s.gender||'',...vals,avg,best,pass].map(csvCell).join(',');
+  });
+  download('跳绳成绩总表-'+c.name+'.csv',[head.map(csvCell).join(','),...rows].join('\r\n'));
+  toast('成绩总表已导出');
+}
+function clearAll(){
+  if(!confirm('确定清空全部班级、学生、测试与成绩数据？此操作不可恢复。'))return;
+  if(!confirm('再次确认：真的要清空全部数据吗？建议先导出备份。'))return;
+  state=defaultState();
+  save();render();toast('全部数据已清空');
+}
+
+/* ============================================================
+   示例数据
+   ============================================================ */
+function loadSample(){
+  const c1={id:uid(),name:'三（1）班'};
+  const c2={id:uid(),name:'三（2）班'};
+  state.classes.push(c1,c2);
+  const names1=[['王梓涵','男'],['李思雨','女'],['张一鸣','男'],['陈欣怡','女'],['刘子轩','男'],['赵梦琪','女']];
+  const names2=[['孙浩宇','男'],['周雨彤','女'],['吴俊杰','男'],['郑诗涵','女'],['冯宇航','男'],['许佳宁','女']];
+  const mk=(c,names)=>{
+    return names.map((nm,i)=>{const s={id:uid(),classId:c.id,seq:i+1,name:nm[0],gender:nm[1]};state.students.push(s);return s;});
+  };
+  const s1=mk(c1,names1),s2=mk(c2,names2);
+  const dates=[dateOffset(-28),dateOffset(-14),dateOffset(0)];
+  const base1=[96,110,121,88,132,104];
+  const base2=[85,101,92,118,96,110];
+  [c1,c2].forEach((c,i)=>{
+    const base=i===0?base1:base2;
+    const stus=i===0?s1:s2;
+    dates.forEach((date,k)=>{
+      const tid=uid();
+      state.tests.push({id:tid,classId:c.id,date:date,name:k===0?'摸底测试':(k===1?'第 2 次测试':'第 3 次测试')});
+      stus.forEach((s,j)=>{
+        const v=Math.max(0,Math.round(base[j]+k*(8+((j*7)%6))+((j+k)%3)));
+        state.records.push({testId:tid,studentId:s.id,count:v});
+      });
+    });
+  });
+  save();render();toast('已载入示例数据，可随时在「数据管理」中清空');
+}
+
+/* ============================================================
+   启动
+   ============================================================ */
+render();
+</script>
+</body>
+</html>
